@@ -8,8 +8,12 @@
 		<list key="ENABLED_TRANSFERS">
 		</list>
 	</section>
+	<section name="NewWizardAction">
+	</section>
 	<section name="ChooseWorkspaceDialogSettings">
 		<item value="381" key="DIALOG_X_ORIGIN"/>
 		<item value="185" key="DIALOG_Y_ORIGIN"/>
+	</section>
+	<section name="BasicNewProjectResourceWizard">
 	</section>
 </section>
