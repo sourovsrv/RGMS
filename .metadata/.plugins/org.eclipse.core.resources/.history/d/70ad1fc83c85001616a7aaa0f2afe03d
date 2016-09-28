@@ -1,0 +1,66 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+
+
+public class Routine extends JFrame {
+
+	private JPanel contentPane;
+	private JPanel subcontentPane;
+	static DefaultListModel<String> model = new DefaultListModel<>();
+	static JList<String> list = new JList<>( model );
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Routine frame = new Routine();
+					frame.setVisible(true);
+					frame.setExtendedState(frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Routine() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1000, 1000);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(null);
+		setContentPane(contentPane);
+		
+		
+		list.setBounds(5, 25, 100, 600);//Adding List
+		contentPane.add(list);
+		
+		//Adding subpanel surrouded with ScrollPane
+		subcontentPane = new JPanel();
+		
+		subcontentPane.setPreferredSize(new Dimension(1400,1400));
+		JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(subcontentPane);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setBounds(120, 30, 1200, 650);
+        //contentPane.setPreferredSize(new Dimension(1000,800));
+        contentPane.add(scrollPane);
+		
+	}
+
+}

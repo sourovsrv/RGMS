@@ -1,0 +1,13 @@
+import javax.swing.JPanel;
+
+
+public class Extracheck extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	public Extracheck() {
+
+	}
+
+}

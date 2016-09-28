@@ -312,7 +312,7 @@ public class FrameCourseInfo extends JFrame {
 	//Update into Database
 	public void update(String cid, String tid, String spw, String type,String batch){
 		try{
-			String query = "Update CourseInfo SET TeacherID = ?, SlotPerWeek = ?, Type= ?, Batch = ? where CourseId= ?";
+			String query = "Update CourseInfo SET TeacherID = ?, SlotPerWeek = ?, Type= ?, Batch = ? where CourseID= ?";
 			PreparedStatement pst= connect.prepareStatement(query);
 			pst.setString(1, tid);
 			pst.setString(2, spw);

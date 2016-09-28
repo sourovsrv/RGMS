@@ -33,7 +33,7 @@ public class ImportStudentInfo extends JFrame {
 	//Read From Excel 2007
 	public static void readfile() throws IOException {
 		
-        String excelFilePath = "D:\\Docs\\Study Docs\\11th Semester\\CSE400\\Works\\Database\\StudentInfo.xlsx";
+        String excelFilePath = "D:\\Docs\\Study Docs\\12th Semester\\CSE400\\Works\\Database\\StudentInfo.xlsx";
         FileInputStream inputStream = new FileInputStream(new File(excelFilePath));
          
         Workbook workbook = new XSSFWorkbook(inputStream);

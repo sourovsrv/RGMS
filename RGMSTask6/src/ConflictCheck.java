@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 public class ConflictCheck {
 	private static Connection connect;
 	
-	private static ResultSet FindCourses(int day,int slot){
+	public static ResultSet FindCourses(int day,int slot){
 		try{
 			String query = "Select * from RoutineInfo where Day = ? AND Slot = ?";
 			PreparedStatement pst = connect.prepareStatement(query);
@@ -21,8 +21,9 @@ public class ConflictCheck {
 		}
 	}
 	
-	private static ResultSet FindCourses(int day,int slot,int pos){
+	public static ResultSet FindCourses(int day,int slot,int pos){
 		try{
+			connect = DB.connectdb();
 			String query = "Select * from RoutineInfo where Day = ? AND Slot = ? AND Pos = ?";
 			PreparedStatement pst = connect.prepareStatement(query);
 			pst.setString(1, day+""); pst.setString(2, slot+""); pst.setString(3, pos+"");
@@ -34,7 +35,7 @@ public class ConflictCheck {
 	}
 	
 	//Given a course position, return true if same batch has another course on same slot
-	private static int BatchConflict(int day, int slot, int pos){
+	public static int BatchConflict(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -83,7 +84,7 @@ public class ConflictCheck {
 	}
 	
 	//Given two position of course find number of same student
-	private static int StudentConflict(int day, int slot, int pos1, int pos2){
+	public static int StudentConflict(int day, int slot, int pos1, int pos2){
 		connect = DB.connectdb();
 		try{
 			String Course1= "",Course2="";
@@ -137,7 +138,7 @@ public class ConflictCheck {
 	}
 	
 	//Given a course position, return true if same teacher has another course on same slot
-	private static int TeacherConflict(int day, int slot, int pos){
+	public static int TeacherConflict(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -186,7 +187,7 @@ public class ConflictCheck {
 	}
 	
 	//Given a course position, return true if same batch has more than 3 Slot class in a day
-	private static int BatchTimeinDay(int day, int slot, int pos){
+	public static int BatchTimeinDay(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -229,7 +230,7 @@ public class ConflictCheck {
 	}
 
 	//Given a course position, return true if same Teacher has more than 3 Slot class in a day
-	private static int TeacherTimeinDay(int day, int slot, int pos){
+	public static int TeacherTimeinDay(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -273,13 +274,14 @@ public class ConflictCheck {
 	
 	public static void main(String[] args){
 		int n= 0;
-		n = BatchConflict(1,1,1);
+		/*n = BatchConflict(1,1,1);
 		n = StudentConflict(1,1,1,4);
 		n = TeacherConflict(1,1,2);
 		n = BatchTimeinDay(1,1,1);
 		n = TeacherTimeinDay(1,1,1);
-		System.out.println(n);
-				
+		System.out.println(n);*/
+		//ResultSet rs=FindCourses(1,1,1);
+		
 	}
 
 }

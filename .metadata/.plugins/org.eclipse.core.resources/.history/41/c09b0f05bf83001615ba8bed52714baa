@@ -1,0 +1,24 @@
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+
+
+public class Extracheck extends JPanel {
+	/**
+	 * @wbp.nonvisual location=482,79
+	 */
+	private final JTextField textField = new JTextField();
+
+	/**
+	 * Create the panel.
+	 */
+	public Extracheck() {
+		textField.setColumns(10);
+		setLayout(null);
+		
+		JButton btnNewButton = new JButton("New button");
+		btnNewButton.setBounds(10, 64, 89, 23);
+		add(btnNewButton);
+
+	}
+}
