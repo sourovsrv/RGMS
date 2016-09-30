@@ -7,19 +7,207 @@ import javax.swing.JOptionPane;
 
 
 public class ConflictCheck {
+	public static String Matrix[][][][]=new String[10][10][10][500];//In per Day,Slot,Position it has Course[1], Room[2], Teacher[3], Batch[4], Number of student[5], Students....
+	ButtonHandler btnhnd = new ButtonHandler();
+	
+	
 	private static Connection connect;
 	
-	private static ResultSet FindCourses(int day,int slot){
+	ConflictCheck(){
+		connect=DB.connectdb();
+		createMatrix();//Must Call to create
+		fillMatrix();//Filling the matrix from routine info database
+
+	}
+	
+	
+	//Given a course position, return true if same batch has another course on same slot
+	private int BatchConflict(int day,int slot,int pos){
+		int posi;
+		String s1= Matrix[day][slot][pos][4],s2="";
+		for(posi=1;posi<=btnhnd.totalpos;posi++){
+			if(pos!=posi){
+				s2=Matrix[day][slot][posi][4];
+				if(s1.equals(s2)) return 1;
+			}
+		}
+		return 0;
+	}
+	//Return the percentage of Maximum conflict of student in that position
+	private int StudentConflict(int day,int slot, int pos){
+		int posi;
+		String s = Matrix[day][slot][pos][5];
+		int nmofstdntpos = Integer.parseInt(s);
+		int MaxCou=0;
+		for(posi=1;posi<=btnhnd.totalpos;posi++){//Traveling through every position of that slot
+			if(posi!=pos){
+				s = Matrix[day][slot][posi][5];
+				if(s==null) continue;
+				int nmofstdnt = Integer.parseInt(s);
+				//System.out.println(s);
+				int cou=0;
+				for(int i=6;i<nmofstdnt;i++){//Traveling  through every student of loop position
+					String s1=Matrix[day][slot][posi][i];
+					for(int n=6;n<=nmofstdntpos;n++){//Traveling  through every student of main position
+						String poss= Matrix[day][slot][pos][n];
+						if(s1.equals(poss)) cou++;
+					}
+				}
+				if(MaxCou<cou) MaxCou=cou;
+			}		
+		}
+		int result= (MaxCou*100)/nmofstdntpos;
+		return result;
+	}
+	
+	
+	//Given a course position, return true if same teacher has another course on same slot
+	private int TeacherConflict(int day,int slot,int pos){
+		int posi;
+		String s1= Matrix[day][slot][pos][3];//3 for teacher;
+		String s2="";
+		for(posi=1;posi<=btnhnd.totalpos;posi++){
+			if(pos!=posi){
+				s2=Matrix[day][slot][posi][3];
+				if(s1.equals(s2)) return 1;
+			}
+		}
+		return 0;
+	}
+	
+	//Given a course position, return true if same batch has more than 3 Slot class in a day
+	private int BatchTimeinDay(int day, int slot, int pos){
+		int sloti,posi;
+		String s1= Matrix[day][slot][pos][4];//4 for Batch;
+		String s2="";
+		int cou=1;
+		for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+			for(posi=1;posi<=btnhnd.totalpos;posi++){
+				if(sloti==slot&&posi==pos) continue;
+				
+				s2=Matrix[day][sloti][posi][4];
+				if(s1.equals(s2)) cou++;
+			}
+		}
+		if(cou>=4) return 1;
+		return 0;
+	}
+	
+	//Given a course position, return true if same teacher has more than 3 Slot class in a day
+	private int TeacherTimeinDay(int day, int slot, int pos){
+		int sloti,posi;
+		String s1= Matrix[day][slot][pos][3];//3 for teacher
+		String s2="";
+		int cou=1;
+		for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+			for(posi=1;posi<=btnhnd.totalpos;posi++){
+				if(sloti==slot&&posi==pos) continue;
+				
+				s2=Matrix[day][sloti][posi][3];
+				if(s1.equals(s2)) cou++;
+			}
+		}
+		
+		if(cou>=4) return 1;
+		return 0;
+	}
+	
+	
+	//Fill with student for a particular course
+	void FillWithStudent(int day,int slot,int pos,String course){
 		try{
-			String query = "Select * from RoutineInfo where Day = ? AND Slot = ?";
+			int cou=6;//
+			String query = "Select StudentID from StudentInfo where CourseID = ? ";
 			PreparedStatement pst = connect.prepareStatement(query);
-			pst.setString(1, day+""); pst.setString(2, slot+"");
+			pst.setString(1, course);
 			ResultSet rs = pst.executeQuery();
-			return rs;
-		} catch(Exception e){
-			return null;
+			while(rs.next()){
+				String s=rs.getString("StudentID");
+				Matrix[day][slot][pos][cou++]=s;
+				//System.out.print(s+" ");
+			}
+			Matrix[day][slot][pos][5]=cou+"";
+			rs.close();
+			pst.close();
+			
+		}catch(Exception e){
+			System.out.println(e);
 		}
 	}
+	
+	
+	void fillMatrix(){
+		try{
+			String query = "Select Day, Slot, Pos, RoutineInfo.CourseID, Room, Batch, TeacherID from RoutineInfo, CourseInfo where RoutineInfo.[CourseID] = CourseInfo.[CourseID]";
+			PreparedStatement pst = connect.prepareStatement(query);
+			
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				int day =rs.getInt("Day");
+				int slot =rs.getInt("Slot");
+				int pos = rs.getInt("Pos");
+				String course =rs.getString("CourseID");
+				String room = rs.getString("Room");
+				String teacher = rs.getString("TeacherID");
+				String batch = rs.getString("Batch");
+				
+				Matrix[day][slot][pos][1] = course;//CourseID
+				Matrix[day][slot][pos][2] = room;//Room
+				Matrix[day][slot][pos][3] = teacher;//Teacher
+				Matrix[day][slot][pos][4] = batch;//batch
+				//System.out.println(day + " "+ slot+ " "+pos+" "+course+ " "+room+" "+teacher+" "+batch);
+				FillWithStudent(day,slot,pos,course);
+			}
+			rs.close();
+			pst.close();
+		} catch(Exception e){
+			System.out.println(e);
+		}
+		
+	}
+	private void createMatrix()
+	{
+		
+		int dayi,posi, sloti, lpi;
+		for(dayi=1;dayi<=btnhnd.totalday+2;dayi++){
+			for(posi=1;posi<=btnhnd.totalpos+2;posi++){
+				for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+					for(lpi=1;lpi<=400;lpi++){
+						Matrix[dayi][sloti][posi][lpi]=null;
+					}
+				}
+			}
+		}
+	}
+	
+	public int checkAllConflict(int day,int slot, int pos){
+		ConflictCheck objconf = new ConflictCheck();
+		if(objconf.BatchConflict(1,1,1)==1) return 1;
+		if(objconf.StudentConflict(day, slot, pos)>=30) return 1;
+		if(objconf.BatchTimeinDay(day, slot, pos)==1) return 1;
+		if(objconf.TeacherTimeinDay(day, slot, pos)==1) return 1;
+		return 0;
+	}
+	
+	public static void main(String[] args){
+		ConflictCheck objconf = new ConflictCheck();
+		int n= 0;
+		n=objconf.checkAllConflict(1,1,1);
+		System.out.println(n);
+	
+		//Printing information of day,slot,pos
+		//System.out.println(objconf.Matrix[3][2][1][1]);
+		/*System.out.println(objconf.Matrix[1][1][1][1]+" "+objconf.Matrix[1][1][1][2]+" "+objconf.Matrix[1][1][1][3]+" "+objconf.Matrix[1][1][1][4]+" "+objconf.Matrix[1][1][1][5]+" ");
+		String s = objconf.Matrix[1][1][1][5];
+		int nmofstdnt = Integer.parseInt(s);
+		for(n=6;n<nmofstdnt;n++)
+		{
+			String s1=objconf.Matrix[1][1][1][n];
+			System.out.print(s1+" ");
+		}*/
+	}
+	
+	
 	
 	private static ResultSet FindCourses(int day,int slot,int pos){
 		try{
@@ -34,7 +222,7 @@ public class ConflictCheck {
 	}
 	
 	//Given a course position, return true if same batch has another course on same slot
-	private static int BatchConflict(int day, int slot, int pos){
+	private static int BatchConflictfromdb(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -81,9 +269,8 @@ public class ConflictCheck {
 			return -1;
 		}
 	}
-	
 	//Given two position of course find number of same student
-	private static int StudentConflict(int day, int slot, int pos1, int pos2){
+	private static int StudentConflictfromdb(int day, int slot, int pos1, int pos2){
 		connect = DB.connectdb();
 		try{
 			String Course1= "",Course2="";
@@ -135,9 +322,9 @@ public class ConflictCheck {
 			return -1;
 		}
 	}
-	
+
 	//Given a course position, return true if same teacher has another course on same slot
-	private static int TeacherConflict(int day, int slot, int pos){
+	private static int TeacherConflictffromdb(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -184,9 +371,9 @@ public class ConflictCheck {
 			return -1;
 		}
 	}
-	
+
 	//Given a course position, return true if same batch has more than 3 Slot class in a day
-	private static int BatchTimeinDay(int day, int slot, int pos){
+	private static int BatchTimeinDayfromdb(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -229,7 +416,7 @@ public class ConflictCheck {
 	}
 
 	//Given a course position, return true if same Teacher has more than 3 Slot class in a day
-	private static int TeacherTimeinDay(int day, int slot, int pos){
+	private static int TeacherTimeinDayfromdb(int day, int slot, int pos){
 		connect = DB.connectdb();
 		try{
 			//Given day,slot and pos, find the batch number
@@ -270,16 +457,4 @@ public class ConflictCheck {
 			return -1;
 		}
 	}	
-	
-	public static void main(String[] args){
-		int n= 0;
-		n = BatchConflict(1,1,1);
-		n = StudentConflict(1,1,1,4);
-		n = TeacherConflict(1,1,2);
-		n = BatchTimeinDay(1,1,1);
-		n = TeacherTimeinDay(1,1,1);
-		System.out.println(n);
-				
-	}
-
 }
