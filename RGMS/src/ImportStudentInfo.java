@@ -125,6 +125,7 @@ public class ImportStudentInfo extends JFrame {
             {
                 FrameStudentInfo sti=new FrameStudentInfo();
                 sti.setVisible(true);
+                sti.setExtendedState(sti.getExtendedState()| JFrame.MAXIMIZED_BOTH);
                 e.getWindow().dispose();
             }
         });

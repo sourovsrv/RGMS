@@ -54,6 +54,7 @@ public class FrameStudentInfo extends JFrame {
                 Home hm=new Home();
                 hm.frame.setVisible(true);
                 e.getWindow().dispose();
+                hm.frame.setExtendedState(hm.frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
             }
         });
 		
@@ -62,6 +63,7 @@ public class FrameStudentInfo extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				ImportStudentInfo isi= new ImportStudentInfo();
 				isi.setVisible(true);
+				isi.setExtendedState(isi.getExtendedState()| JFrame.MAXIMIZED_BOTH);
 				dispose();
 			}
 		});

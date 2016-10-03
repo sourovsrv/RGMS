@@ -24,12 +24,12 @@ public class Home {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				//Applying Look and Feel
+				/*//Applying Look and Feel
 				try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                     ex.printStackTrace();
-                }
+                }*/
 				
 				try {
 					Home window = new Home();
@@ -64,6 +64,7 @@ public class Home {
 				FrameMainRoomInfo mri=new FrameMainRoomInfo();
 				mri.setVisible(true);
 				frame.dispose();
+				mri.setExtendedState(mri.getExtendedState()| JFrame.MAXIMIZED_BOTH);
 			}
 		});
 		btnRoomInfo.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -81,6 +82,7 @@ public class Home {
 			FrameStudentInfo si= new FrameStudentInfo();
 			si.setVisible(true);
 			frame.dispose();
+			si.setExtendedState(si.getExtendedState()| JFrame.MAXIMIZED_BOTH);
 			}
 		});
 		btnStudentInfo.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -93,6 +95,7 @@ public class Home {
 				FrameCourseInfo ci = new FrameCourseInfo();
 				ci.setVisible(true);
 				frame.dispose();
+				ci.setExtendedState(ci.getExtendedState()| JFrame.MAXIMIZED_BOTH);
 			}
 		});
 		btnCourseInfo.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -100,6 +103,14 @@ public class Home {
 		frame.getContentPane().add(btnCourseInfo);
 		
 		JButton btnRoutine = new JButton("Routine");
+		btnRoutine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FrameRoutine rti = new FrameRoutine();
+				rti.setVisible(true);
+				frame.dispose();
+				rti.setExtendedState(rti.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
 		btnRoutine.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnRoutine.setBounds(507, 199, 120, 34);
 		frame.getContentPane().add(btnRoutine);

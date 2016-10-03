@@ -99,6 +99,7 @@ public class FrameRoomInfo extends JFrame {
             {
                 FrameMainRoomInfo mri=new FrameMainRoomInfo();
                 mri.setVisible(true);
+                mri.setExtendedState(mri.getExtendedState()| JFrame.MAXIMIZED_BOTH);
                 e.getWindow().dispose();
             }
         });

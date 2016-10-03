@@ -16,7 +16,7 @@ public class ConflictCheck {
 	ConflictCheck(){
 		connect=DB.connectdb();
 		createMatrix();//Must Call to create
-		fillMatrix();//Filling the matrix from routine info database
+		FillMatrix();//Filling the matrix from routine info database
 
 	}
 	
@@ -28,6 +28,7 @@ public class ConflictCheck {
 		for(posi=1;posi<=btnhnd.totalpos;posi++){
 			if(pos!=posi){
 				s2=Matrix[day][slot][posi][4];
+				if(s1==null||s2==null) continue;
 				if(s1.equals(s2)) return 1;
 			}
 		}
@@ -67,8 +68,10 @@ public class ConflictCheck {
 		String s1= Matrix[day][slot][pos][3];//3 for teacher;
 		String s2="";
 		for(posi=1;posi<=btnhnd.totalpos;posi++){
+			//System.out.println(s1+" "+s2);
 			if(pos!=posi){
 				s2=Matrix[day][slot][posi][3];
+				if(s1==null||s2==null) continue;
 				if(s1.equals(s2)) return 1;
 			}
 		}
@@ -86,6 +89,7 @@ public class ConflictCheck {
 				if(sloti==slot&&posi==pos) continue;
 				
 				s2=Matrix[day][sloti][posi][4];
+				if(s1==null||s2==null) continue;
 				if(s1.equals(s2)) cou++;
 			}
 		}
@@ -104,10 +108,10 @@ public class ConflictCheck {
 				if(sloti==slot&&posi==pos) continue;
 				
 				s2=Matrix[day][sloti][posi][3];
+				if(s1==null||s2==null) continue;
 				if(s1.equals(s2)) cou++;
 			}
 		}
-		
 		if(cou>=4) return 1;
 		return 0;
 	}
@@ -134,9 +138,84 @@ public class ConflictCheck {
 			System.out.println(e);
 		}
 	}
-	
-	
-	void fillMatrix(){
+	void FillWithTeacherAndBatch(int day,int slot, int pos, String course)
+	{
+		try{
+			String query = "Select TeacherID, Batch from CourseInfo where CourseID= ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, course);
+			ResultSet rs=pst.executeQuery();
+			while(rs.next())
+			{
+				String teacher = rs.getString("TeacherID");
+				Matrix[day][slot][pos][3]=teacher; //3 for Teacher;
+				String batch = rs.getString("Batch");
+				Matrix[day][slot][pos][4]=batch; //4 for Batch;
+			}
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	public void InsertIntoMatrix(int day, int slot, int pos, String course)
+	{
+		try{
+			String query = "insert into RoutineInfo (Day,Slot,Pos,CourseID) values(?,?,?,?)";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, day+"");
+			pst.setString(2, slot+"");
+			pst.setString(3, pos+"");
+			pst.setString(4, course);
+			pst.execute();
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			Matrix[day][slot][pos][1]=course; //1 for course;
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			FillWithStudent(day,slot,pos,course);
+			
+			
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}	
+	}
+	//Update into Database
+	public void UpdateInRoutine(int day, int slot,int pos, String course ){
+		try{
+			String query = "Update RoutineInfo SET CourseID = ? where Day= ? AND Slot = ? AND Pos = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, course);
+			pst.setString(2, day+"");
+			pst.setString(3, slot+"");
+			pst.setString(4, pos+"");
+			Matrix[day][slot][pos][1]=course;//1 for course
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			FillWithStudent(day,slot,pos,course);
+			pst.execute();
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	//Delete from Database
+	public void DeleteFromRoutine(int day, int slot,int pos){
+		try{
+			String query = "Delete from RoutineInfo where Day = ? AND Slot = ? AND Pos = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, day+"");
+			pst.setString(2,slot+"");
+			pst.setString(3,pos+"");
+			pst.execute();
+			//System.out.println(day+" "+slot+" "+pos);
+			for(int i=1;i<=20;i++){
+				Matrix[day][slot][pos][i]=null;
+			}
+			
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	void FillMatrix(){
 		try{
 			String query = "Select Day, Slot, Pos, RoutineInfo.CourseID, Room, Batch, TeacherID from RoutineInfo, CourseInfo where RoutineInfo.[CourseID] = CourseInfo.[CourseID]";
 			PreparedStatement pst = connect.prepareStatement(query);
@@ -180,29 +259,30 @@ public class ConflictCheck {
 		}
 	}
 	
-	public int checkAllConflict(int day,int slot, int pos){
-		ConflictCheck objconf = new ConflictCheck();
-		if(objconf.BatchConflict(1,1,1)==1) return 1;
-		if(objconf.StudentConflict(day, slot, pos)>=30) return 1;
-		if(objconf.BatchTimeinDay(day, slot, pos)==1) return 1;
-		if(objconf.TeacherTimeinDay(day, slot, pos)==1) return 1;
+	public int CheckAllConflict(int day,int slot, int pos){
+		if(BatchConflict(day,slot,pos)==1) return 1;
+		if(TeacherConflict(day,slot,pos)==1) return 1;
+		if(StudentConflict(day, slot, pos)>=30) return 1;
+		if(BatchTimeinDay(day, slot, pos)==1) return 1;
+		if(TeacherTimeinDay(day, slot, pos)==1) return 1;
 		return 0;
 	}
 	
 	public static void main(String[] args){
-		ConflictCheck objconf = new ConflictCheck();
+		ConflictCheck objconf2 = new ConflictCheck();
 		int n= 0;
-		n=objconf.checkAllConflict(1,1,1);
+		n=objconf2.CheckAllConflict(1,3,1);
+		//n=objconf2.TeacherConflict(1, 3, 1);
 		System.out.println(n);
-	
-		//Printing information of day,slot,pos
-		//System.out.println(objconf.Matrix[3][2][1][1]);
-		/*System.out.println(objconf.Matrix[1][1][1][1]+" "+objconf.Matrix[1][1][1][2]+" "+objconf.Matrix[1][1][1][3]+" "+objconf.Matrix[1][1][1][4]+" "+objconf.Matrix[1][1][1][5]+" ");
-		String s = objconf.Matrix[1][1][1][5];
+		//objconf.DeleteFromRoutine(1, 1, 1);
+		//objconf.InsertIntoMatrix(1,1,1,"CSE-400");
+		//objconf.UpdateInRoutine(1, 1, 1, "CSE-441");
+		/*System.out.println(objconf2.Matrix[1][1][1][1]+" "+objconf2.Matrix[1][1][1][2]+" "+objconf2.Matrix[1][1][1][3]+" "+objconf2.Matrix[1][1][1][4]+" "+objconf2.Matrix[1][1][1][5]+" ");
+		String s = objconf2.Matrix[1][1][1][5];
 		int nmofstdnt = Integer.parseInt(s);
 		for(n=6;n<nmofstdnt;n++)
 		{
-			String s1=objconf.Matrix[1][1][1][n];
+			String s1=objconf2.Matrix[1][1][1][n];
 			System.out.print(s1+" ");
 		}*/
 	}

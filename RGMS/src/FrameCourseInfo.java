@@ -101,6 +101,7 @@ public class FrameCourseInfo extends JFrame {
                 Home hm=new Home();
                 hm.frame.setVisible(true);
                 e.getWindow().dispose();
+                hm.frame.setExtendedState(hm.frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
             }
         });
 		

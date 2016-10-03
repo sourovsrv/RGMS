@@ -53,6 +53,7 @@ public class FrameMainRoomInfo extends JFrame {
             {
                 Home hm=new Home();
                 hm.frame.setVisible(true);
+                hm.frame.setExtendedState(hm.frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
                 e.getWindow().dispose();
             }
         });
@@ -62,6 +63,7 @@ public class FrameMainRoomInfo extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				FrameRoomInfo ri=new FrameRoomInfo();
 				ri.setVisible(true);
+				ri.setExtendedState(ri.getExtendedState()| JFrame.MAXIMIZED_BOTH);
 				dispose();
 			}
 		});
