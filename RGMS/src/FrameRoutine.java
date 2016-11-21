@@ -63,8 +63,8 @@ public class FrameRoutine extends JFrame {
 		
 		//Adding List
 		ListHandler lsthnd= new ListHandler();
-		contentPane.add(lsthnd.list);
-		
+		contentPane.add(lsthnd.scrollPaneList);
+		//contentPane.add(lsthnd.list);
 		
 		
 		

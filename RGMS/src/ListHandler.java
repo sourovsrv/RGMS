@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
@@ -12,6 +13,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 
 
@@ -20,12 +22,21 @@ import javax.swing.TransferHandler;
 public class ListHandler {
 	static DefaultListModel<String> model = new DefaultListModel<>();
 	static JList<String> list = new JList<>( model );
+	JScrollPane scrollPaneList;
 	static Connection connect;
 	
 	ListHandler(){
 		connect = DB.connectdb();
 		
-		list.setBounds(5, 25, 100, 600);
+		
+		scrollPaneList = new JScrollPane();;
+        scrollPaneList.setViewportView(list);
+        //scrollPaneList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPaneList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPaneList.setBounds(5, 25, 100, 600);
+		
+		list.setPreferredSize(new Dimension(80,2000));
+        //list.setBounds(5, 25, 100, 600);
 		InsertintoList();
 		
 		

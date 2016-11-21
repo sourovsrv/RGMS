@@ -58,11 +58,11 @@ public class FrameCourseInfo extends JFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				try {
+				/*try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                     ex.printStackTrace();
-                }
+                }*/
 				
 				try {
 					FrameCourseInfo frame = new FrameCourseInfo();
@@ -137,7 +137,7 @@ public class FrameCourseInfo extends JFrame {
 		
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(254, 68, 540, 353);
+		scrollPane.setBounds(254, 68, 700, 500);
 		contentpane.add(scrollPane);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
@@ -415,7 +415,6 @@ public class FrameCourseInfo extends JFrame {
 		contentpane.add(lblType);
 		
 		tfBatch = new JTextField();
-		tfBatch.setToolTipText("Theory/Lab");
 		tfBatch.setBounds(147, 269, 86, 20);
 		tfBatch.setText("");
 		contentpane.add(tfBatch);

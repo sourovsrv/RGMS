@@ -127,8 +127,6 @@ public class ButtonHandler {
 			subcontentPane.validate();
 			subcontentPane.revalidate();
 			subcontentPane.repaint();
-			//System.out.println("totalpos");
-			//CreateButton();
 		}
 	}
 	public void MinusButton(){
@@ -141,8 +139,6 @@ public class ButtonHandler {
 			subcontentPane.validate();
 			subcontentPane.revalidate();
 			subcontentPane.repaint();
-			//System.out.println("totalpos");
-			//CreateButton();
 		}
 	}
 	

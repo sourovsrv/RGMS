@@ -34,6 +34,7 @@ public class ConflictCheck {
 		}
 		return 0;
 	}
+	
 	//Return the percentage of Maximum conflict of student in that position
 	private int StudentConflict(int day,int slot, int pos){
 		int posi;
@@ -138,6 +139,7 @@ public class ConflictCheck {
 			System.out.println(e);
 		}
 	}
+	
 	void FillWithTeacherAndBatch(int day,int slot, int pos, String course)
 	{
 		try{
@@ -157,6 +159,7 @@ public class ConflictCheck {
 			JOptionPane.showMessageDialog(null, e);
 		}
 	}
+	
 	public void InsertIntoMatrix(int day, int slot, int pos, String course)
 	{
 		try{
@@ -178,6 +181,7 @@ public class ConflictCheck {
 			JOptionPane.showMessageDialog(null, e);
 		}	
 	}
+	
 	//Update into Database
 	public void UpdateInRoutine(int day, int slot,int pos, String course ){
 		try{
@@ -196,6 +200,7 @@ public class ConflictCheck {
 			JOptionPane.showMessageDialog(null, e);
 		}
 	}
+	
 	//Delete from Database
 	public void DeleteFromRoutine(int day, int slot,int pos){
 		try{
@@ -215,6 +220,7 @@ public class ConflictCheck {
 			JOptionPane.showMessageDialog(null, e);
 		}
 	}
+	
 	void FillMatrix(){
 		try{
 			String query = "Select Day, Slot, Pos, RoutineInfo.CourseID, Room, Batch, TeacherID from RoutineInfo, CourseInfo where RoutineInfo.[CourseID] = CourseInfo.[CourseID]";
@@ -244,6 +250,7 @@ public class ConflictCheck {
 		}
 		
 	}
+	
 	private void createMatrix()
 	{
 		
