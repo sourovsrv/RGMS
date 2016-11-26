@@ -1,0 +1,56 @@
+import java.sql.*;
+import java.util.*;
+
+public class RoomHandler {
+	private Connection connect=null;
+	Map<String, Integer> roomidmap = new HashMap<String, Integer>(200);//Mapping RoomID to a unique number
+	int roomstatus[][][]=new int[200][12][12];//To keep status of room
+	String roomtype[]= new String[200];//To Keep type
+	int roomcapacity[]=new int[200];//To keep capacity
+	/**
+	 * @param args
+	 */
+//	Fill ComboBox with Room
+	private void RoomSearch(){
+		connect= DB.connectdb();
+		try{
+			String room,type;
+			int day,slot,status,capacity,NmbrOfRoom=1;
+			String query = "select * from RoomInfo";
+			PreparedStatement pst = connect.prepareStatement(query);
+			ResultSet rs= pst.executeQuery();
+			if(rs==null) return;
+			while(rs.next()){
+				room="";capacity=0;day=0;slot=0;status=0; type="";
+				room = rs.getString("RoomID");
+				capacity = rs.getInt("Capacity");
+				type = rs.getString("Type");
+				day = rs.getInt("Day");
+				slot = rs.getInt("Slot");
+				status =rs.getInt("Status");
+				//System.out.println(room+" "+capacity+" "+type+" "+day+" "+slot+" "+status);
+				if(roomidmap.get(room)==null){
+					roomidmap.put(room, NmbrOfRoom);//Mapping a unique number to each room
+					NmbrOfRoom++;
+				}
+				int id=roomidmap.get(room);//Accessing room's unique id
+				roomcapacity[id]=capacity;
+				roomtype[id]=type;
+				roomstatus[id][day][slot]=status;
+				
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	RoomHandler(){
+
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		RoomHandler rm=new RoomHandler();
+		rm.RoomSearch();
+
+	}
+
+}

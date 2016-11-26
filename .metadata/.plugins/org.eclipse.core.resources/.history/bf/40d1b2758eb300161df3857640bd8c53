@@ -1,0 +1,37 @@
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.*;
+
+public class RoomHandler {
+	private Connection connect=null;
+	/**
+	 * @param args
+	 */
+//	Fill ComboBox with Room
+	private void RoomSearch(){
+		connect= DB.connectdb();
+		try{
+			String query = "select * from RoomInfo";
+			PreparedStatement pst = connect.prepareStatement(query);
+			ResultSet rs= pst.executeQuery();
+			if(rs==null) return;
+			while(rs.next()){
+				String room = rs.getString("RoomID");
+				String status =rs.getString("Status");
+				//System.out.println(room+" "+status);
+				if(status.equalsIgnoreCase("0"))
+				boxRoom[day][slot][pos].addItem(room);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	RoomHandler(){
+
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

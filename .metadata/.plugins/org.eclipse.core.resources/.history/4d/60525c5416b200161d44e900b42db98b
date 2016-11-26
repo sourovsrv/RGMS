@@ -1,0 +1,547 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JOptionPane;
+
+
+public class ConflictCheck {
+	public static String Matrix[][][][]=new String[10][10][10][500];//In per Day,Slot,Position it has Course[1], Room[2], Teacher[3], Batch[4], Number of student[5], Students....
+	ButtonHandler btnhnd = new ButtonHandler();
+	
+	
+	private static Connection connect;
+	
+	ConflictCheck(){
+		connect=DB.connectdb();
+		createMatrix();//Must Call to create
+		FillMatrix();//Filling the matrix from routine info database
+
+	}
+	
+	
+	//Given a course position, return true if same batch has another course on same slot
+	private int BatchConflict(int day,int slot,int pos){
+		int posi;
+		String s1= Matrix[day][slot][pos][4],s2="";
+		for(posi=1;posi<=btnhnd.totalpos;posi++){
+			if(pos!=posi){
+				s2=Matrix[day][slot][posi][4];
+				if(s1==null||s2==null) continue;
+				if(s1.equals(s2)) return 1;
+			}
+		}
+		return 0;
+	}
+	
+	//Return the percentage of Maximum conflict of student in that position
+	private int StudentConflict(int day,int slot, int pos){
+		int posi;
+		String s = Matrix[day][slot][pos][5];
+		int nmofstdntpos = Integer.parseInt(s);
+		int MaxCou=0;
+		for(posi=1;posi<=btnhnd.totalpos;posi++){//Traveling through every position of that slot
+			if(posi!=pos){
+				s = Matrix[day][slot][posi][5];
+				if(s==null) continue;
+				int nmofstdnt = Integer.parseInt(s);
+				//System.out.println(s);
+				int cou=0;
+				for(int i=6;i<nmofstdnt;i++){//Traveling  through every student of loop position
+					String s1=Matrix[day][slot][posi][i];
+					for(int n=6;n<=nmofstdntpos;n++){//Traveling  through every student of main position
+						String poss= Matrix[day][slot][pos][n];
+						if(s1.equals(poss)) cou++;
+					}
+				}
+				if(MaxCou<cou) MaxCou=cou;
+			}		
+		}
+		int result= (MaxCou*100)/nmofstdntpos;
+		return result;
+	}
+	
+	
+	//Given a course position, return true if same teacher has another course on same slot
+	private int TeacherConflict(int day,int slot,int pos){
+		int posi;
+		String s1= Matrix[day][slot][pos][3];//3 for teacher;
+		String s2="";
+		for(posi=1;posi<=btnhnd.totalpos;posi++){
+			//System.out.println(s1+" "+s2);
+			if(pos!=posi){
+				s2=Matrix[day][slot][posi][3];
+				if(s1==null||s2==null) continue;
+				if(s1.equals(s2)) return 1;
+			}
+		}
+		return 0;
+	}
+	
+	//Given a course position, return true if same batch has more than 3 Slot class in a day
+	private int BatchTimeinDay(int day, int slot, int pos){
+		int sloti,posi;
+		String s1= Matrix[day][slot][pos][4];//4 for Batch;
+		String s2="";
+		int cou=1;
+		for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+			for(posi=1;posi<=btnhnd.totalpos;posi++){
+				if(sloti==slot&&posi==pos) continue;
+				
+				s2=Matrix[day][sloti][posi][4];
+				if(s1==null||s2==null) continue;
+				if(s1.equals(s2)) cou++;
+			}
+		}
+		if(cou>=4) return 1;
+		return 0;
+	}
+	
+	//Given a course position, return true if same teacher has more than 3 Slot class in a day
+	private int TeacherTimeinDay(int day, int slot, int pos){
+		int sloti,posi;
+		String s1= Matrix[day][slot][pos][3];//3 for teacher
+		String s2="";
+		int cou=1;
+		for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+			for(posi=1;posi<=btnhnd.totalpos;posi++){
+				if(sloti==slot&&posi==pos) continue;
+				
+				s2=Matrix[day][sloti][posi][3];
+				if(s1==null||s2==null) continue;
+				if(s1.equals(s2)) cou++;
+			}
+		}
+		if(cou>=4) return 1;
+		return 0;
+	}
+	
+	
+	//Fill with student for a particular course
+	void FillWithStudent(int day,int slot,int pos,String course){
+		try{
+			int cou=6;//
+			String query = "Select StudentID from StudentInfo where CourseID = ? ";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, course);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				String s=rs.getString("StudentID");
+				Matrix[day][slot][pos][cou++]=s;
+				//System.out.print(s+" ");
+			}
+			Matrix[day][slot][pos][5]=cou+"";
+			rs.close();
+			pst.close();
+			
+		}catch(Exception e){
+			System.out.println(e);
+		}
+	}
+	
+	void FillWithTeacherAndBatch(int day,int slot, int pos, String course)
+	{
+		try{
+			String query = "Select TeacherID, Batch from CourseInfo where CourseID= ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, course);
+			ResultSet rs=pst.executeQuery();
+			while(rs.next())
+			{
+				String teacher = rs.getString("TeacherID");
+				Matrix[day][slot][pos][3]=teacher; //3 for Teacher;
+				String batch = rs.getString("Batch");
+				Matrix[day][slot][pos][4]=batch; //4 for Batch;
+			}
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
+	public void InsertIntoMatrix(int day, int slot, int pos, String course)
+	{
+		try{
+			String query = "insert into RoutineInfo (Day,Slot,Pos,CourseID) values(?,?,?,?)";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, day+"");
+			pst.setString(2, slot+"");
+			pst.setString(3, pos+"");
+			pst.setString(4, course);
+			pst.execute();
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			Matrix[day][slot][pos][1]=course; //1 for course;
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			FillWithStudent(day,slot,pos,course);
+			
+			
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}	
+	}
+	
+	//Update into Database
+	public void UpdateInRoutine(int day, int slot,int pos, String course ){
+		try{
+			String query = "Update RoutineInfo SET CourseID = ? where Day= ? AND Slot = ? AND Pos = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, course);
+			pst.setString(2, day+"");
+			pst.setString(3, slot+"");
+			pst.setString(4, pos+"");
+			Matrix[day][slot][pos][1]=course;//1 for course
+			FillWithTeacherAndBatch(day,slot,pos,course);
+			FillWithStudent(day,slot,pos,course);
+			pst.execute();
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
+	//Delete from Database
+	public void DeleteFromRoutine(int day, int slot,int pos){
+		try{
+			String query = "Delete from RoutineInfo where Day = ? AND Slot = ? AND Pos = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, day+"");
+			pst.setString(2,slot+"");
+			pst.setString(3,pos+"");
+			pst.execute();
+			//System.out.println(day+" "+slot+" "+pos);
+			for(int i=1;i<=20;i++){
+				Matrix[day][slot][pos][i]=null;
+			}
+			
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
+	void FillMatrix(){
+		try{
+			String query = "Select Day, Slot, Pos, RoutineInfo.CourseID, Room, Batch, TeacherID from RoutineInfo, CourseInfo where RoutineInfo.[CourseID] = CourseInfo.[CourseID]";
+			PreparedStatement pst = connect.prepareStatement(query);
+			
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				int day =rs.getInt("Day");
+				int slot =rs.getInt("Slot");
+				int pos = rs.getInt("Pos");
+				String course =rs.getString("CourseID");
+				String room = rs.getString("Room");
+				String teacher = rs.getString("TeacherID");
+				String batch = rs.getString("Batch");
+				
+				Matrix[day][slot][pos][1] = course;//CourseID
+				Matrix[day][slot][pos][2] = room;//Room
+				Matrix[day][slot][pos][3] = teacher;//Teacher
+				Matrix[day][slot][pos][4] = batch;//batch
+				//System.out.println(day + " "+ slot+ " "+pos+" "+course+ " "+room+" "+teacher+" "+batch);
+				FillWithStudent(day,slot,pos,course);
+			}
+			rs.close();
+			pst.close();
+		} catch(Exception e){
+			System.out.println(e);
+		}
+		
+	}
+	
+	private void createMatrix()
+	{
+		
+		int dayi,posi, sloti, lpi;
+		for(dayi=1;dayi<=btnhnd.totalday+2;dayi++){
+			for(posi=1;posi<=btnhnd.totalpos+2;posi++){
+				for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+					for(lpi=1;lpi<=400;lpi++){
+						Matrix[dayi][sloti][posi][lpi]=null;
+					}
+				}
+			}
+		}
+	}
+	
+	public int CheckAllConflict(int day,int slot, int pos){
+		if(BatchConflict(day,slot,pos)==1) return 1;
+		if(TeacherConflict(day,slot,pos)==1) return 1;
+		if(StudentConflict(day, slot, pos)>=30) return 1;
+		if(BatchTimeinDay(day, slot, pos)==1) return 1;
+		if(TeacherTimeinDay(day, slot, pos)==1) return 1;
+		return 0;
+	}
+	
+	public static void main(String[] args){
+		ConflictCheck objconf2 = new ConflictCheck();
+		int n= 0;
+		n=objconf2.CheckAllConflict(1,3,1);
+		//n=objconf2.TeacherConflict(1, 3, 1);
+		System.out.println(n);
+		//objconf.DeleteFromRoutine(1, 1, 1);
+		//objconf.InsertIntoMatrix(1,1,1,"CSE-400");
+		//objconf.UpdateInRoutine(1, 1, 1, "CSE-441");
+		/*System.out.println(objconf2.Matrix[1][1][1][1]+" "+objconf2.Matrix[1][1][1][2]+" "+objconf2.Matrix[1][1][1][3]+" "+objconf2.Matrix[1][1][1][4]+" "+objconf2.Matrix[1][1][1][5]+" ");
+		String s = objconf2.Matrix[1][1][1][5];
+		int nmofstdnt = Integer.parseInt(s);
+		for(n=6;n<nmofstdnt;n++)
+		{
+			String s1=objconf2.Matrix[1][1][1][n];
+			System.out.print(s1+" ");
+		}*/
+	}
+	
+	
+	
+	private static ResultSet FindCourses(int day,int slot,int pos){
+		try{
+			String query = "Select * from RoutineInfo where Day = ? AND Slot = ? AND Pos = ?";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, day+""); pst.setString(2, slot+""); pst.setString(3, pos+"");
+			ResultSet rs = pst.executeQuery();
+			return rs;
+		} catch(Exception e){
+			return null;
+		}
+	}
+	
+	//Given a course position, return true if same batch has another course on same slot
+	private static int BatchConflictfromdb(int day, int slot, int pos){
+		connect = DB.connectdb();
+		try{
+			//Given day,slot and pos, find the batch number
+			String Batch1="",Course1="",Course2="",Batch2="";
+			int flag=0;
+			//Finding batch of given course
+			ResultSet rs1= FindCourses(day,slot,pos);
+			while(rs1.next()){
+				Course1 = rs1.getString("CourseID");
+			}
+			String query = "Select Batch from CourseInfo where CourseID = ?";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, Course1+"");		;
+			
+			ResultSet rs= pst.executeQuery();
+			while(rs.next()){
+				Batch1= rs.getString("Batch");
+			}
+			//Finding all other course of that slot
+			String query2 = "SELECT CourseID from RoutineInfo where Day = ? AND Slot = ? AND Not(Pos) = ?";
+			PreparedStatement pst2 = connect.prepareStatement(query2);
+			pst2.setString(1, day+""); pst2.setString(2, slot+""); pst2.setString(3, pos+"");
+			
+			ResultSet rs2= pst2.executeQuery();
+			//Matching batch of other courses with given course
+			while(rs2.next()){
+				Course2= rs2.getString("CourseID");
+				String query3 = "Select Batch from CourseInfo where CourseID = '"+Course2+"' ";
+				PreparedStatement pst3 = connect.prepareStatement(query3);
+				ResultSet rs3 = pst3.executeQuery(); 
+				
+				while(rs3.next()){
+					Batch2= rs3.getString("Batch");
+					if(Batch2==null) continue;
+					if(Batch2.equals(Batch1)) flag=1;
+				}
+				pst3.close();
+			}
+			pst.close();
+			pst2.close();
+			return flag;
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(null, e);
+			return -1;
+		}
+	}
+	//Given two position of course find number of same student
+	private static int StudentConflictfromdb(int day, int slot, int pos1, int pos2){
+		connect = DB.connectdb();
+		try{
+			String Course1= "",Course2="";
+			ResultSet rs1 = FindCourses(day,slot,pos1);
+			ResultSet rs2 = FindCourses(day,slot,pos2);
+			while(rs1.next()){
+				Course1=rs1.getString("CourseID");
+			}
+			while(rs2.next()){
+				Course2=rs2.getString("CourseID");
+			}
+			if(Course1.equals("") || Course2.equals("")) return 0;
+			if(Course1.equals(Course2)) return 0;
+			
+			//Select all student from Course1
+			String query3 = "Select StudentID from StudentInfo where CourseID = ?";
+			PreparedStatement pst3 = connect.prepareStatement(query3);
+			pst3.setString(1,Course1);
+			ResultSet rs3= pst3.executeQuery();
+			String student1[] = new String[1000];
+			int i=0,cou=0,ln=0;
+			while(rs3.next()){
+				student1[ln++]=rs3.getString("StudentID");
+			}
+			
+			//Select all student from Course2
+			String query4 = "Select StudentID from StudentInfo where CourseID = ?";
+			PreparedStatement pst4 = connect.prepareStatement(query4);
+			pst4.setString(1,Course2);
+			ResultSet rs4= pst4.executeQuery();
+			
+			//Finding number of match
+			cou=0;
+			String student2="";
+			while(rs4.next()){
+				student2=rs4.getString("StudentID");
+				for(i=0;i<ln;i++){
+					if(student1[i].equals(student2)){
+						cou++;
+					}
+				}
+			}
+			pst3.close();
+			pst4.close();
+			
+			return cou;
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(null, e);
+			return -1;
+		}
+	}
+
+	//Given a course position, return true if same teacher has another course on same slot
+	private static int TeacherConflictffromdb(int day, int slot, int pos){
+		connect = DB.connectdb();
+		try{
+			//Given day,slot and pos, find the batch number
+			String Teacher1="",Course1="",Course2="",Teacher2="";
+			int flag=0;
+			//Finding batch of given course
+			ResultSet rs1= FindCourses(day,slot,pos);
+			while(rs1.next()){
+				Course1 = rs1.getString("CourseID");
+			}
+			String query = "Select TeacherID from CourseInfo where CourseID = ?";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, Course1+"");		;
+			
+			ResultSet rs= pst.executeQuery();
+			while(rs.next()){
+				Teacher1= rs.getString("TeacherID");
+			}
+			//Finding all other course of that slot
+			String query2 = "SELECT CourseID from RoutineInfo where Day = ? AND Slot = ? AND Not(Pos) = ?";
+			PreparedStatement pst2 = connect.prepareStatement(query2);
+			pst2.setString(1, day+""); pst2.setString(2, slot+""); pst2.setString(3, pos+"");
+			
+			ResultSet rs2= pst2.executeQuery();
+			//Matching teacher of other courses with given course
+			while(rs2.next()){
+				Course2= rs2.getString("CourseID");
+				String query3 = "Select TeacherID from CourseInfo where CourseID = '"+Course2+"' ";
+				PreparedStatement pst3 = connect.prepareStatement(query3);
+				ResultSet rs3 = pst3.executeQuery(); 
+				
+				while(rs3.next()){
+					Teacher2= rs3.getString("TeacherID");
+					if(Teacher2==null) continue;
+					if(Teacher2.equals(Teacher1)) flag=1;
+				}
+				pst3.close();
+			}
+			pst.close();
+			pst2.close();
+			return flag;
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(null, e);
+			return -1;
+		}
+	}
+
+	//Given a course position, return true if same batch has more than 3 Slot class in a day
+	private static int BatchTimeinDayfromdb(int day, int slot, int pos){
+		connect = DB.connectdb();
+		try{
+			//Given day,slot and pos, find the batch number
+			String Batch1="",Course1="";
+			int flag=0;
+			//Finding batch of given course
+			ResultSet rs1= FindCourses(day,slot,pos);
+			while(rs1.next()){
+				Course1 = rs1.getString("CourseID");
+			}
+			String query = "Select Batch from CourseInfo where CourseID = ?";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, Course1+"");		;
+			
+			ResultSet rs= pst.executeQuery();
+			while(rs.next()){
+				Batch1= rs.getString("Batch");
+			}
+			//Finding all other course of that slot
+			String query2 = "SELECT Count(Slot) from RoutineInfo, CourseInfo where RoutineInfo.Day = ? AND CourseInfo.CourseID = RoutineInfo.CourseID AND CourseInfo.Batch = ?";
+			PreparedStatement pst2 = connect.prepareStatement(query2);
+			pst2.setString(1, day+""); pst2.setString(2, Batch1); //pst2.setString(3, pos+"");
+			
+			ResultSet rs2= pst2.executeQuery();
+			while(rs2.next()){
+				int numberofslot=0;
+				numberofslot=rs2.getInt(1);
+				if(numberofslot>=4) flag = 1;
+			}
+			rs.close();
+			rs2.close();
+			pst.close();
+			pst2.close();
+
+			return flag;
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(null, e);
+			return -1;
+		}
+	}
+
+	//Given a course position, return true if same Teacher has more than 3 Slot class in a day
+	private static int TeacherTimeinDayfromdb(int day, int slot, int pos){
+		connect = DB.connectdb();
+		try{
+			//Given day,slot and pos, find the batch number
+			String Teacher1="",Course1="";
+			int flag=0;
+			//Finding batch of given course
+			ResultSet rs1= FindCourses(day,slot,pos);
+			while(rs1.next()){
+				Course1 = rs1.getString("CourseID");
+			}
+			String query = "Select TeacherID from CourseInfo where CourseID = ?";
+			PreparedStatement pst = connect.prepareStatement(query);
+			pst.setString(1, Course1+"");		;
+			
+			ResultSet rs= pst.executeQuery();
+			while(rs.next()){
+				Teacher1= rs.getString("TeacherID");
+			}
+			//Finding all other course of that slot
+			String query2 = "SELECT Count(Slot) from RoutineInfo, CourseInfo where RoutineInfo.Day = ? AND CourseInfo.CourseID = RoutineInfo.CourseID AND CourseInfo.TeacherID = ?";
+			PreparedStatement pst2 = connect.prepareStatement(query2);
+			pst2.setString(1, day+""); pst2.setString(2, Teacher1);
+			
+			ResultSet rs2= pst2.executeQuery();
+			while(rs2.next()){
+				int numberofslot=0;
+				numberofslot=rs2.getInt(1);
+				if(numberofslot>=4) flag = 1;
+			}
+			rs.close();
+			rs2.close();
+			pst.close();
+			pst2.close();
+
+			return flag;
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(null, e);
+			return -1;
+		}
+	}	
+}

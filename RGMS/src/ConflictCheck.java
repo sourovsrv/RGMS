@@ -1,3 +1,4 @@
+import java.awt.dnd.DnDConstants;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -216,6 +217,29 @@ public class ConflictCheck {
 			}
 			
 			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	//Delete Based on position from Database
+	public void DeleteFromRoutineOnPos(int pos,int totalslot){
+		try{
+			String query = "Delete from RoutineInfo where Pos = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1,pos+"");
+			pst.execute();
+			
+			
+			int posi,dayi,sloti,i;
+			//Setting all the value of day and slot overthe total pos to null
+			for(dayi=1;dayi<=btnhnd.totalday;dayi++){
+				for(sloti=1;sloti<=totalslot;sloti++){
+					//System.out.println(Matrix[dayi][sloti][pos][1]);
+					for(i=1;i<=20;i++){ 
+						Matrix[dayi][sloti][pos][i]=null;
+					}
+				}
+			}	
 		}catch(Exception e){
 			JOptionPane.showMessageDialog(null, e);
 		}
@@ -544,4 +568,25 @@ public class ConflictCheck {
 			return -1;
 		}
 	}	
+	
+	public static int NumberOfPosQuery(){
+		int pos=2;
+		try{
+			connect = DB.connectdb();
+			String query="Select Pos from RoutineInfo";
+			PreparedStatement pst= connect.prepareStatement(query);
+			ResultSet rs=pst.executeQuery();
+			if(rs!=null){
+				while(rs.next()){
+					String s=rs.getString("Pos");
+					int nw=Integer.parseInt(s);
+					if(pos<nw)
+					pos=nw;
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return pos;
+	}
 }

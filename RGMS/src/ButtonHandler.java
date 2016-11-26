@@ -6,26 +6,34 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import java.sql.Connection;
 import javax.swing.TransferHandler;
+import javax.swing.text.Position;
+
 
 
 
 public class ButtonHandler {
 	public JPanel subcontentPane;
 	public JScrollPane scrollPane;
+	private Connection connectbtnhnd=null;
 	JButton btnplus = new JButton("+");
 	JButton btnminus = new JButton("-");
+	RoomHandler rmhnd = new RoomHandler();
 	
 	ConflictCheck objconf ;
 	public int totalday=7;
-	public int totalslot=7;
-	public int totalpos=2;
+	public int totalslot;
+	public int totalpos;
 	
 	JComboBox boxRoom[][][] = new JComboBox[10][10][10];
     JButton btn[][][] = new JButton[10][10][10];
@@ -69,11 +77,14 @@ public class ButtonHandler {
 		});
         btnminus.setBounds(1320, 65, 45, 30);
         
-        
-        CreateButton();        
+        totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
+		totalpos=ConflictCheck.NumberOfPosQuery();
+        CreateButton();
         
 	}
 	public void CreateButton(){
+		objconf = new ConflictCheck();
+		rmhnd.RoomSearch();//Fetch From database
 		int dayi,posi,sloti,pos=0;
 		int boxleft=40,boxup=35;
 		int slotlblpos=130;
@@ -91,7 +102,6 @@ public class ButtonHandler {
         	for(posi=1;posi<=totalpos;posi++){
         		for(sloti=1;sloti<=totalslot;sloti++){
         			boxRoom[dayi][sloti][posi] = new JComboBox();
-                    boxRoom[dayi][sloti][posi].addItem("Com.Lab");
             		boxRoom[dayi][sloti][posi].setBounds(boxleft+5, boxup, 70, 25);
             		subcontentPane.add(boxRoom[dayi][sloti][posi]);
                     
@@ -113,8 +123,20 @@ public class ButtonHandler {
         	}
         	boxup+=20;
         }
-        objconf = new ConflictCheck();
+        
         FillAllButton();
+        //Adding action listener to the combo box
+        for(dayi=1;dayi<=totalday;dayi++){
+        	for(posi=1;posi<=totalpos;posi++){
+        		for(sloti=1;sloti<=totalslot;sloti++){
+                     boxRoom[dayi][sloti][posi].addActionListener(new ActionListener() {                   	
+                    	public void actionPerformed(ActionEvent arg0) {
+                    		CheckRoomAfterChange();
+            			}
+                    });
+        		}
+        	}
+        }
 	}
 	
 	public void AddButton(){
@@ -129,8 +151,11 @@ public class ButtonHandler {
 			subcontentPane.repaint();
 		}
 	}
+	
 	public void MinusButton(){
 		if(totalpos>2) {
+			objconf.DeleteFromRoutineOnPos(totalpos,totalslot);	
+				
 			totalpos--;
 			subcontentPane.removeAll();
 			
@@ -164,7 +189,8 @@ public class ButtonHandler {
 			}
 		}
 	}
-    void FillMatrixAfterDrop()
+    
+	void FillMatrixAfterDrop()
 	{
 		int dayi,posi, sloti, lpi;
 		String coursemat="",coursebtn="",teacher="";
@@ -198,26 +224,119 @@ public class ButtonHandler {
 		CheckAndColor();
 		
 	}
+	
 	void FillAllButton()
 	{
 		int dayi,posi, sloti, lpi;
-		String course="",teacher="";
+		String room,course="",teacher="";
 		for(dayi=1;dayi<=totalday;dayi++){
 			for(posi=1;posi<=totalpos;posi++){
 				for(sloti=1;sloti<=totalslot;sloti++){
 					course=objconf.Matrix[dayi][sloti][posi][1]; //1 for Course
+					room=objconf.Matrix[dayi][sloti][posi][2];//2 for Room
 					teacher=objconf.Matrix[dayi][sloti][posi][3]; //3 for Teacher
 					if(course==null) course = "CSE-XXX";
 					if(teacher==null) teacher = "TTT";
 					btn[dayi][sloti][posi].setText(course);
 					lblTeacher[dayi][sloti][posi].setText(teacher);
+					
+					boxRoom[dayi][sloti][posi].addItem("RRR");
+					for(String key: rmhnd.roomidmap.keySet()){
+						int id=rmhnd.roomidmap.get(key);
+						if(rmhnd.roomstatus[id][dayi][sloti]==0){
+							boxRoom[dayi][sloti][posi].addItem(key);
+						}
+					}
+					if(room!=null){
+						boxRoom[dayi][sloti][posi].setSelectedItem(room);
+					}
 				}
 			}
 		}
-		
+		for(dayi=1;dayi<=totalday;dayi++){
+			for(posi=1;posi<=totalpos;posi++){
+				for(sloti=1;sloti<=totalslot;sloti++){
+					room=(String)boxRoom[dayi][sloti][posi].getSelectedItem();
+					//System.out.println(day+" "+slot+ " "+pos+" "+room);
+					if(!room.equals("RRR"))
+					DeleteRoomComboBoxAfterDrop(dayi,sloti,posi,room);
+				}
+				
+			}
+		}
 		CheckAndColor();
 		
 	}
+	
+	/*//Given a day and slot, find all the available in that day and slot and pos
+	private void FillRoomComboBox(int day,int slot,int pos){
+		boxRoom[day][slot][pos].removeAllItems();
+		boxRoom[day][slot][pos].addItem("RRR");
+		for(String key: rmhnd.roomidmap.keySet()){
+			int id=rmhnd.roomidmap.get(key);
+			if(rmhnd.roomstatus[id][day][slot]==0){
+				boxRoom[day][slot][pos].addItem(key);
+			}
+		}
+		String room=objconf.Matrix[day][slot][pos][2];//2 for Room
+		if(room!=null&&!room.equals("")){
+			boxRoom[day][slot][pos].setSelectedItem(room);
+			System.out.println(day+" "+slot+ " "+pos+" "+room);
+			DeleteRoomComboBoxAfterDrop(day,slot,pos,room);
+		}
+		
+	}*/
+	
+	//Given a day and slot, delete room from all the position
+	private void AddRoomComboBoxAfterDrop(int day,int slot,int pos,String rm){
+		int posi;
+		for(posi=1;posi<=totalpos;posi++){
+			if(pos==posi) continue;
+			boxRoom[day][slot][posi].addItem(rm);
+		}
+	}
+	
+	
+	//Given a day and slot, delete room from all the position
+	private void DeleteRoomComboBoxAfterDrop(int day,int slot,int pos,String rm){
+		int posi;
+		for(posi=1;posi<=totalpos;posi++){
+			if(pos==posi) continue;
+			boxRoom[day][slot][posi].removeItem(rm);
+		}
+	}
+	
+	//Checking for Change in Room combo box
+	private void CheckRoomAfterChange(){
+		int dayi,sloti,posi,id;
+		for(dayi=1;dayi<=totalday;dayi++){
+			for(posi=1;posi<=totalpos;posi++){
+				for(sloti=1;sloti<=totalslot;sloti++){
+					String rm=(String) boxRoom[dayi][sloti][posi].getSelectedItem();
+					String roommat= objconf.Matrix[dayi][sloti][posi][2];//2 for room
+					if(rm.equals("RRR")){
+						if(roommat!=null&&!roommat.equals("")){
+							AddRoomComboBoxAfterDrop(dayi,sloti,posi,roommat);
+							rmhnd.DeleteFromMatrix(dayi, sloti, posi);
+						}
+					}
+					else{
+						if(roommat==null||roommat.equals("")){
+							rmhnd.InsertIntoMatrix(dayi,sloti,posi,rm);
+							DeleteRoomComboBoxAfterDrop(dayi,sloti,posi,rm);
+						} else if(!roommat.equals(rm)){
+							AddRoomComboBoxAfterDrop(dayi,sloti,posi,roommat);
+							rmhnd.UpdateIntoMatrix(dayi,sloti,posi,rm);
+							DeleteRoomComboBoxAfterDrop(dayi,sloti,posi,rm);
+						}
+					}
+					
+				}
+			}
+		}
+	}
+	
+	//Value Import Handler
 	public  class ValueImportTransferHandler extends TransferHandler {
 
         public final DataFlavor SUPPORTED_DATE_FLAVOR = DataFlavor.stringFlavor;

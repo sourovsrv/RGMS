@@ -1,0 +1,49 @@
+import java.sql.*;
+import java.util.*;
+
+public class RoomHandler {
+	private Connection connect=null;
+	Map<String, Integer> roomidmap = new HashMap<String, Integer>(200);//Mapping RoomID to a unique number
+	int RoomStatus[][][]=new int[200][12][12];
+	/**
+	 * @param args
+	 */
+//	Fill ComboBox with Room
+	private void RoomSearch(){
+		connect= DB.connectdb();
+		try{
+			String room,capacity,type,status;
+			int day,slot,NmbrOfRoom=1;
+			String query = "select * from RoomInfo";
+			PreparedStatement pst = connect.prepareStatement(query);
+			ResultSet rs= pst.executeQuery();
+			if(rs==null) return;
+			while(rs.next()){
+				room="";capacity="";day=0;slot=0;status=""; type="";
+				room = rs.getString("RoomID");
+				capacity = rs.getString("Capacity");
+				type = rs.getString("Type");
+				day = rs.getInt("Day");
+				slot = rs.getInt("Slot");
+				status =rs.getString("Status");
+				//System.out.println(room+" "+capacity+" "+type+" "+day+" "+slot+" "+status);
+				if(roomidmap.get(room)==null){
+					roomidmap.put(room, NmbrOfRoom);
+					NmbrOfRoom++;
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	RoomHandler(){
+
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		RoomHandler rm=new RoomHandler();
+		rm.RoomSearch();
+
+	}
+
+}

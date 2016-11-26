@@ -82,7 +82,7 @@ public class Home {
 		JButton btnStudentInfo = new JButton("Student Info");
 		btnStudentInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			FrameMainStudentInfo si= new FrameMainStudentInfo();
+			FrameStudentInfo si= new FrameStudentInfo();
 			si.setVisible(true);
 			frame.dispose();
 			si.setExtendedState(si.getExtendedState()| JFrame.MAXIMIZED_BOTH);
