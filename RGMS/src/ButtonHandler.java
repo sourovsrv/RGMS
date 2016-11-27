@@ -32,8 +32,8 @@ public class ButtonHandler {
 	
 	ConflictCheck objconf ;
 	public int totalday=7;
-	public int totalslot;
-	public int totalpos;
+	public int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
+	public int totalpos=ConflictCheck.NumberOfPosQuery();
 	
 	JComboBox boxRoom[][][] = new JComboBox[10][10][10];
     JButton btn[][][] = new JButton[10][10][10];
@@ -45,8 +45,8 @@ public class ButtonHandler {
 	
 	public void ButtonHandler(){
 		ButtonHandler btnhndthis=new ButtonHandler();
+		
 	}
-	
 	public void SubPanelCreator(){
 		
 		//SubcontentPane
@@ -77,8 +77,6 @@ public class ButtonHandler {
 		});
         btnminus.setBounds(1320, 65, 45, 30);
         
-        totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
-		totalpos=ConflictCheck.NumberOfPosQuery();
         CreateButton();
         
 	}
@@ -104,8 +102,12 @@ public class ButtonHandler {
         			boxRoom[dayi][sloti][posi] = new JComboBox();
             		boxRoom[dayi][sloti][posi].setBounds(boxleft+5, boxup, 70, 25);
             		subcontentPane.add(boxRoom[dayi][sloti][posi]);
-                    
+            		
                     btn[dayi][sloti][posi] = new JButton(dayi+"-XXX-"+sloti);
+                    btn[dayi][sloti][posi].addActionListener(new ActionListener() {
+            			public void actionPerformed(ActionEvent arg0) {
+            			}
+            		});
                     btn[dayi][sloti][posi].setBounds(boxleft+80, boxup, 100, 25);
                     btn[dayi][sloti][posi].setBackground(Color.WHITE);
                     btn[dayi][sloti][posi].setTransferHandler(new ValueImportTransferHandler());
@@ -132,6 +134,7 @@ public class ButtonHandler {
                      boxRoom[dayi][sloti][posi].addActionListener(new ActionListener() {                   	
                     	public void actionPerformed(ActionEvent arg0) {
                     		CheckRoomAfterChange();
+                    		CheckAndColor();
             			}
                     });
         		}
@@ -181,8 +184,11 @@ public class ButtonHandler {
 						btn[dayi][sloti][posi].setBackground(Color.GRAY);
 					}
 					else{
-						int check = objconf.CheckAllConflict(dayi,sloti, posi);
+						int check = objconf.CheckAllRedConflict(dayi,sloti, posi);
 						if(check==1) btn[dayi][sloti][posi].setBackground(Color.RED);
+						else if(objconf.CheckAllYellowConflict(dayi, sloti, posi)==1){
+							btn[dayi][sloti][posi].setBackground(Color.YELLOW);
+						}
 						else btn[dayi][sloti][posi].setBackground(Color.WHITE);						
 					}
 				}

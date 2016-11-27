@@ -8,6 +8,8 @@ import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -25,19 +27,25 @@ public class ListHandler {
 	JScrollPane scrollPaneList;
 	static Connection connect;
 	
+	static Map<String, Integer> TotalSlotPerWeekCourse = new HashMap<String, Integer>(200);//Total Number of Slot for Any Course
+	static Map<String, Integer> CurrentSlotPerWeekCourse = new HashMap<String, Integer>(200);//Current Number Of Slot 
+	static Map<String, Integer> CourseIsPresentInList = new HashMap<String, Integer>(200);//Whether it is present in List or Not
+	
 	ListHandler(){
 		connect = DB.connectdb();
 		
 		
 		scrollPaneList = new JScrollPane();;
         scrollPaneList.setViewportView(list);
-        //scrollPaneList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPaneList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPaneList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPaneList.setBounds(5, 25, 100, 600);
 		
-		list.setPreferredSize(new Dimension(80,2000));
+		list.setPreferredSize(new Dimension(120,2000));
         //list.setBounds(5, 25, 100, 600);
-		InsertintoList();
+		FillTotalNumberOFSlot();
+		UpdateCurrentSlotPerWeek();
+		InsertIntoList();
 		
 		
 		list.setTransferHandler(new ValueExportTransferHandler());
@@ -54,21 +62,82 @@ public class ListHandler {
         });//
 	}
 	
-	
-	//Filling List with Courses From CourseInfo Table
-	public void InsertintoList(){
+	private void FillTotalNumberOFSlot(){
 		try{
-			model.removeAllElements();
-			String s="CSE-XXX";
-			model.addElement(s);
-			String query = "Select CourseID from CourseInfo";
+			TotalSlotPerWeekCourse.clear();
+			String s="";
+			int slot=0;
+			String query = "Select CourseID,SlotPerWeek from CourseInfo";
 			PreparedStatement pst = connect.prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()){
 				s=rs.getString("CourseID");
-				model.addElement(s);
+				slot=rs.getInt("SlotPerWeek");
+				TotalSlotPerWeekCourse.put(s,slot);
+				//System.out.println(s+" "+slot);
 			}
 			rs.close();
+			pst.close();
+			/*for(String key: TotalSlotPerWeekCourse.keySet()){
+				slot=TotalSlotPerWeekCourse.get(key);
+				System.out.println(key+" "+slot);
+			}*/
+		} catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	//Update the maps of Current slot list
+	private static void UpdateCurrentSlotPerWeek(){
+		int slot,dayi,posi,sloti;
+		String course;
+		CurrentSlotPerWeekCourse.clear();
+		//Putting all from total to current
+		for(String key: TotalSlotPerWeekCourse.keySet()){
+			slot=TotalSlotPerWeekCourse.get(key);
+			//System.out.println(key+" "+slot);
+			CurrentSlotPerWeekCourse.put(key,slot);
+		}
+		//Reducing it according to matrix;
+		ButtonHandler btnhnd=new ButtonHandler();
+		int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
+		int totalpos=ConflictCheck.NumberOfPosQuery();
+		for(dayi=1;dayi<=btnhnd.totalday;dayi++){
+			for(posi=1;posi<=totalpos;posi++){
+				for(sloti=1;sloti<=totalslot;sloti++){
+					course=ConflictCheck.Matrix[dayi][sloti][posi][1];//1 for course
+					if(course!=null){
+						slot=CurrentSlotPerWeekCourse.get(course);
+						slot--;
+						CurrentSlotPerWeekCourse.put(course,slot);
+						//System.out.println(course+" "+CurrentSlotPerWeekCourse.get(course));
+						
+					}
+					
+				}
+			}
+		}
+		/*for(String key: CurrentSlotPerWeekCourse.keySet()){
+			slot=CurrentSlotPerWeekCourse.get(key);
+			System.out.println(key+" "+slot);
+		}*/
+	}
+	
+	
+	//Filling List with Courses From CourseInfo Table
+	public static void InsertIntoList(){
+		try{
+			int slot;
+			model.removeAllElements();
+			String s="CSE-XXX";
+			model.addElement(s);
+			for(String key: CurrentSlotPerWeekCourse.keySet()){
+				slot=CurrentSlotPerWeekCourse.get(key);
+				if(slot>0){
+					model.addElement(key+"---"+slot);
+				}
+				//System.out.println(key+" "+slot);
+			}
+			
 		} catch(Exception e){
 			JOptionPane.showMessageDialog(null, e);
 		}
@@ -86,6 +155,15 @@ public class ListHandler {
 
         public String getValue() {
         	value= list.getSelectedValue();
+        	String s="";
+        	if(value==null) {
+        		return value;
+        	}
+        	for(int i=0;i<value.length();i++){
+        		if(value.charAt(i)=='-'&&value.charAt(i+1)=='-'&&value.charAt(i+2)=='-') break;
+        		s+=value.charAt(i);
+        	}
+        	value=s;
             return value;
         }
 
@@ -104,7 +182,12 @@ public class ListHandler {
         @Override
         protected void exportDone(JComponent source, Transferable data, int action) {
             super.exportDone(source, data, action);
+            
             // Decide what to do after the drop has been accepted
+            UpdateCurrentSlotPerWeek();
+            InsertIntoList();
+            //JOptionPane.showMessageDialog(null, value);
+            //model.removeElement(value);
         }
 
     }

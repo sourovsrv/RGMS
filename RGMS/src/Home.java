@@ -65,7 +65,7 @@ public class Home {
 		frame.getContentPane().add(lblHome);
 		
 		
-		JButton btnRoomInfo = new JButton("Room Info");
+		JButton btnRoomInfo = new JButton("1. Room Info");
 		btnRoomInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				FrameMainRoomInfo mri=new FrameMainRoomInfo();
@@ -79,7 +79,7 @@ public class Home {
 		frame.getContentPane().add(btnRoomInfo);
 		
 		
-		JButton btnStudentInfo = new JButton("Student Info");
+		JButton btnStudentInfo = new JButton("2. Student Info");
 		btnStudentInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			FrameStudentInfo si= new FrameStudentInfo();
@@ -92,7 +92,7 @@ public class Home {
 		btnStudentInfo.setBounds(800, 200, 200, 50);
 		frame.getContentPane().add(btnStudentInfo);
 		
-		JButton btnCourseInfo = new JButton("Course Info");
+		JButton btnCourseInfo = new JButton("3. Course Info");
 		btnCourseInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				FrameCourseInfo ci = new FrameCourseInfo();
@@ -105,7 +105,7 @@ public class Home {
 		btnCourseInfo.setBounds(400, 400, 200, 50);
 		frame.getContentPane().add(btnCourseInfo);
 		
-		JButton btnRoutine = new JButton("Routine");
+		JButton btnRoutine = new JButton("4. Routine");
 		btnRoutine.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				FrameRoutine rti = new FrameRoutine();

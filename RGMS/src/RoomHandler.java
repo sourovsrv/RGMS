@@ -9,7 +9,7 @@ public class RoomHandler {
 	static Map<String, Integer> roomidmap = new HashMap<String, Integer>(200);//Mapping RoomID to a unique number
 	static int roomstatus[][][]=new int[200][12][12];//To keep status of room
 	String roomtype[]= new String[200];//To Keep type
-	int roomcapacity[]=new int[200];//To keep capacity
+	static int roomcapacity[]=new int[200];//To keep capacity
 	/**
 	 * @param args
 	 */

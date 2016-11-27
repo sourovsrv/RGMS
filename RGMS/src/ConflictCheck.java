@@ -18,6 +18,7 @@ public class ConflictCheck {
 		connect=DB.connectdb();
 		createMatrix();//Must Call to create
 		FillMatrix();//Filling the matrix from routine info database
+		
 
 	}
 	
@@ -30,8 +31,34 @@ public class ConflictCheck {
 			if(pos!=posi){
 				s2=Matrix[day][slot][posi][4];
 				if(s1==null||s2==null) continue;
-				if(s1.equals(s2)) return 1;
+				if(s1.equals(s2)) {
+					return 1;
+				}
 			}
+		}
+		return 0;
+	}
+	//Given a course position, return true if this batch has more than 5 day class in week
+	private int BatchTimeInWeek(int day,int slot,int pos){
+		int dayi,flag,cou=0,sloti,posi;
+		String s1= Matrix[day][slot][pos][4],s2="";
+		for(dayi=1;dayi<=btnhnd.totalday;dayi++){
+			flag=0;
+			for(posi=1;posi<=btnhnd.totalpos;posi++){
+				for(sloti=1;sloti<=btnhnd.totalslot;sloti++){
+					s2=Matrix[dayi][sloti][posi][4];
+					if(s1==null||s2==null) continue;
+					if(s1.equals(s2)) {
+						//System.out.println(s1+" "+s2);
+						flag=1;
+					}
+				}
+			}
+			if(flag==1) cou++;
+		}
+		if(cou>5){
+			//System.out.println(day+" "+slot+" "+pos+" "+cou);
+			return 1;
 		}
 		return 0;
 	}
@@ -69,6 +96,7 @@ public class ConflictCheck {
 		int posi;
 		String s1= Matrix[day][slot][pos][3];//3 for teacher;
 		String s2="";
+		//System.out.println(btnhnd.totalpos);
 		for(posi=1;posi<=btnhnd.totalpos;posi++){
 			//System.out.println(s1+" "+s2);
 			if(pos!=posi){
@@ -118,6 +146,23 @@ public class ConflictCheck {
 		return 0;
 	}
 	
+	//Given a course position, return true if Room Capacity is smaller than the Number of Student 
+	private int RoomCapacityConflict(int day,int slot,int pos){
+		String s=Matrix[day][slot][pos][5];//5 for number of student
+		String rm=Matrix[day][slot][pos][2];//2 for Room
+		String c=Matrix[day][slot][pos][1];
+		RoomHandler rmhnd=new RoomHandler();
+		if(s!=null&&rm!=null){
+			int crsstdnt=Integer.parseInt(s);
+			//System.out.println(c+" "+s+" "+rm);
+			if(rmhnd.roomidmap.get(rm)==null) return 0;
+			 int rmstdnt=rmhnd.roomcapacity[rmhnd.roomidmap.get(rm)];
+			 if(rmstdnt<crsstdnt) return 1;
+			 //System.out.println(c+" "+s+" "+rm+" "+rmstdnt);
+			
+		}
+		return 0;
+	}
 	
 	//Fill with student for a particular course
 	void FillWithStudent(int day,int slot,int pos,String course){
@@ -290,7 +335,7 @@ public class ConflictCheck {
 		}
 	}
 	
-	public int CheckAllConflict(int day,int slot, int pos){
+	public int CheckAllRedConflict(int day,int slot, int pos){
 		if(BatchConflict(day,slot,pos)==1) return 1;
 		if(TeacherConflict(day,slot,pos)==1) return 1;
 		if(StudentConflict(day, slot, pos)>=30) return 1;
@@ -298,11 +343,15 @@ public class ConflictCheck {
 		if(TeacherTimeinDay(day, slot, pos)==1) return 1;
 		return 0;
 	}
-	
+	public int CheckAllYellowConflict(int day,int slot,int pos){
+		if(BatchTimeInWeek(day,slot,pos)==1) return 1;
+		if(RoomCapacityConflict(day,slot,pos)==1) return 1;
+		return 0;
+	}
 	public static void main(String[] args){
 		ConflictCheck objconf2 = new ConflictCheck();
 		int n= 0;
-		n=objconf2.CheckAllConflict(1,3,1);
+		n=objconf2.CheckAllRedConflict(1,3,1);
 		//n=objconf2.TeacherConflict(1, 3, 1);
 		System.out.println(n);
 		//objconf.DeleteFromRoutine(1, 1, 1);
