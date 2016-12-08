@@ -1,0 +1,156 @@
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+import javax.swing.JToggleButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JFormattedTextField;
+import javax.swing.JScrollBar;
+import javax.swing.JProgressBar;
+import javax.swing.JSlider;
+import javax.swing.JMenuBar;
+
+
+public class Frame1 {
+
+	private JFrame frame;
+	private JLabel lblmsg;
+	private int flag=0;
+	private JTextField tfval;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					String s="";
+					s+="sdf";
+					JOptionPane.showMessageDialog(null, s);
+					Frame1 window = new Frame1();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public Frame1() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.getContentPane().setBackground(Color.GRAY);
+		frame.getContentPane().setFont(new Font("Tahoma", Font.PLAIN, 12));
+		frame.setBounds(100, 100, 881, 486);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		
+		
+		JButton btnNewButton = new JButton("Show Message");
+		btnNewButton.addActionListener(new ActionListener() {
+			
+			
+			public void actionPerformed(ActionEvent arg0) {
+				//JOptionPane.showMessageDialog(null, "This is the message");
+				
+				String s1="This is the message";
+				String s2="Message";
+				String s3=tfval.getText();
+				System.out.println(s3);
+				if(s3.equals("0")) flag=0;
+				if(s3.equals("1")) flag=1;
+				if(flag==0 ){
+					lblmsg.setText(s1);
+				}
+				if(flag==1 ){
+					lblmsg.setText(s2);
+				}
+				//System.out.println(flag);
+			}
+		});
+		btnNewButton.setForeground(Color.DARK_GRAY);
+		btnNewButton.setBackground(Color.RED);
+		btnNewButton.setBounds(70, 355, 118, 23);
+		frame.getContentPane().add(btnNewButton);
+		
+		lblmsg = new JLabel("Message");
+		lblmsg.setBounds(118, 65, 200, 50);
+		frame.getContentPane().add(lblmsg);
+		
+		tfval = new JTextField();
+		tfval.setBounds(137, 126, 86, 20);
+		frame.getContentPane().add(tfval);
+		tfval.setColumns(10);
+		
+		String ss[]={"A","B","C","D","E","F","G","H","I","J","K","L"};
+		JComboBox<Object> comboBox = new JComboBox<Object>(ss);
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		comboBox.setBounds(281, 100, 86, 20);
+		frame.getContentPane().add(comboBox);
+		
+		JCheckBox chckbxNewCheckBox_1 = new JCheckBox("New check box");
+		chckbxNewCheckBox_1.setBounds(126, 275, 97, 23);
+		frame.getContentPane().add(chckbxNewCheckBox_1);
+		
+		JRadioButton rdbtnNewRadioButton = new JRadioButton("New radio button");
+		buttonGroup.add(rdbtnNewRadioButton);
+		rdbtnNewRadioButton.setBounds(33, 21, 109, 23);
+		frame.getContentPane().add(rdbtnNewRadioButton);
+		
+		JRadioButton rdbtnNewRadioButton_1 = new JRadioButton("New radio button");
+		buttonGroup.add(rdbtnNewRadioButton_1);
+		rdbtnNewRadioButton_1.setBounds(33, 65, 109, 23);
+		frame.getContentPane().add(rdbtnNewRadioButton_1);
+		
+		JToggleButton tglbtnNewToggleButton = new JToggleButton("New toggle button");
+		tglbtnNewToggleButton.setBounds(197, 31, 121, 23);
+		frame.getContentPane().add(tglbtnNewToggleButton);
+		
+		JFormattedTextField formattedTextField = new JFormattedTextField();
+		formattedTextField.setBounds(56, 143, 86, 20);
+		frame.getContentPane().add(formattedTextField);
+		
+		JScrollBar scrollBar = new JScrollBar();
+		scrollBar.setBounds(487, 21, 17, 187);
+		frame.getContentPane().add(scrollBar);
+		
+		JProgressBar progressBar = new JProgressBar();
+		progressBar.setBounds(281, 149, 146, 14);
+		frame.getContentPane().add(progressBar);
+		
+		JSlider slider = new JSlider();
+		slider.setBounds(152, 182, 200, 26);
+		frame.getContentPane().add(slider);
+		
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBounds(563, 94, 97, 21);
+		frame.getContentPane().add(menuBar);
+		
+	}
+}

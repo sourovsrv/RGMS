@@ -4,11 +4,11 @@ import java.util.*;
 import javax.swing.JOptionPane;
 
 public class RoomHandler {
-	private Connection connect=null;
+	//private Connection connect=null;
 	ConflictCheck objconf;
 	static Map<String, Integer> roomidmap = new HashMap<String, Integer>(200);//Mapping RoomID to a unique number
 	static int roomstatus[][][]=new int[200][12][12];//To keep status of room
-	String roomtype[]= new String[200];//To Keep type
+	static String roomtype[]= new String[200];//To Keep type
 	static int roomcapacity[]=new int[200];//To keep capacity
 	/**
 	 * @param args
@@ -20,7 +20,7 @@ public class RoomHandler {
 			String room,type;
 			int day,slot,status,capacity,NmbrOfRoom=1;
 			String query = "select * from RoomInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs= pst.executeQuery();
 			if(rs==null) return;
 			while(rs.next()){
@@ -39,6 +39,7 @@ public class RoomHandler {
 				int id=roomidmap.get(room);//Accessing room's unique id
 				roomcapacity[id]=capacity;
 				roomtype[id]=type;
+				//System.out.println(roomtype[id]);
 				roomstatus[id][day][slot]=status;
 				
 			}
@@ -60,7 +61,7 @@ public class RoomHandler {
 	public void DeleteFromMatrix(int day,int slot,int pos){
 		try{
 			String query = "Update RoutineInfo SET Room = ? where Day= ? AND Slot = ? AND Pos = ?";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, "");
 			pst.setString(2, day+"");
 			pst.setString(3, slot+"");
@@ -75,7 +76,7 @@ public class RoomHandler {
 	public void InsertIntoMatrix(int day,int slot,int pos, String room){
 		try{
 			String query = "Select * from RoutineInfo where Day= ? AND Slot = ? AND Pos = ?";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, day+"");
 			pst.setString(2,slot+"");
 			pst.setString(3, pos+"");
@@ -87,7 +88,7 @@ public class RoomHandler {
 			/*else{
 				//System.out.println("Check");
 				String query2 = "insert into RoutineInfo (Day,Slot,Pos,Room) values(?,?,?,?)";
-				PreparedStatement pst2= connect.prepareStatement(query2);
+				PreparedStatement pst2= Home.connect.prepareStatement(query2);
 				pst2.setString(1, day+"");
 				pst2.setString(2, slot+"");
 				pst2.setString(3, pos+"");
@@ -102,7 +103,7 @@ public class RoomHandler {
 	public void UpdateIntoMatrix(int day,int slot,int pos, String room){
 		try{
 			String query = "Update RoutineInfo SET Room = ? where Day= ? AND Slot = ? AND Pos = ?";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, room);
 			pst.setString(2, day+"");
 			pst.setString(3, slot+"");
@@ -115,7 +116,7 @@ public class RoomHandler {
 		}
 	}
 	RoomHandler(){
-		connect= DB.connectdb();
+		//connect= DB.connectdb();
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

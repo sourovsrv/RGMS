@@ -2,22 +2,26 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="btnhnd" key="selection"/>
+		<item value="Theory" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="btnhnd"/>
-			<item value="connect"/>
-			<item value="Query"/>
-			<item value="Delete"/>
-			<item value="FillComboBox"/>
-			<item value="FilllComboBox"/>
-			<item value="combo"/>
-			<item value="check"/>
+			<item value="Regular"/>
+			<item value="roomandCourse"/>
+			<item value="room"/>
+			<item value="CheckAllYellow"/>
+			<item value="RoomCapacity"/>
+			<item value="CheckAllYelllow"/>
+			<item value="RoomCapacityConflict"/>
+			<item value="NumberOfSlot"/>
 		</list>
 		<list key="replacehistory">
+			<item value="Theory"/>
+			<item value="Home.TotalNumberOfSlot"/>
+			<item value="Home.TotalNumberOfPos"/>
+			<item value="Home.connect"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

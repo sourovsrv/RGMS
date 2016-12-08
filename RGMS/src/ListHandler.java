@@ -25,14 +25,14 @@ public class ListHandler {
 	static DefaultListModel<String> model = new DefaultListModel<>();
 	static JList<String> list = new JList<>( model );
 	JScrollPane scrollPaneList;
-	static Connection connect;
+	//static Connection connect;
 	
 	static Map<String, Integer> TotalSlotPerWeekCourse = new HashMap<String, Integer>(200);//Total Number of Slot for Any Course
 	static Map<String, Integer> CurrentSlotPerWeekCourse = new HashMap<String, Integer>(200);//Current Number Of Slot 
 	static Map<String, Integer> CourseIsPresentInList = new HashMap<String, Integer>(200);//Whether it is present in List or Not
 	
 	ListHandler(){
-		connect = DB.connectdb();
+		//connect = DB.connectdb();
 		
 		
 		scrollPaneList = new JScrollPane();;
@@ -68,7 +68,7 @@ public class ListHandler {
 			String s="";
 			int slot=0;
 			String query = "Select CourseID,SlotPerWeek from CourseInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()){
 				s=rs.getString("CourseID");
@@ -99,11 +99,10 @@ public class ListHandler {
 		}
 		//Reducing it according to matrix;
 		ButtonHandler btnhnd=new ButtonHandler();
-		int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
-		int totalpos=ConflictCheck.NumberOfPosQuery();
+		//int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
 		for(dayi=1;dayi<=btnhnd.totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					course=ConflictCheck.Matrix[dayi][sloti][posi][1];//1 for course
 					if(course!=null){
 						slot=CurrentSlotPerWeekCourse.get(course);
@@ -164,6 +163,7 @@ public class ListHandler {
         		s+=value.charAt(i);
         	}
         	value=s;
+        	if(value.equals("CSE-XXX")) value="---";
             return value;
         }
 

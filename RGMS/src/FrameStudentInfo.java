@@ -37,7 +37,7 @@ import javax.swing.JScrollPane;
 public class FrameStudentInfo extends JFrame {
 
 	private JPanel contentPane=new JPanel();
-	private static Connection connect=null;
+	//private static Connection connect=null;
 	private JTextField tfStudentID=new JTextField();
 	private JLabel lblSID = new JLabel();
 	private JTextField tfSIDCID=new JTextField();;
@@ -69,7 +69,7 @@ public class FrameStudentInfo extends JFrame {
 	 * Create the frame.
 	 */
 	public FrameStudentInfo() {
-		connect = DB.connectdb();
+		//connect = DB.connectdb();
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 1000, 500);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -245,7 +245,7 @@ public class FrameStudentInfo extends JFrame {
 	private  void refreshTableAll(){
 		try{
 			String query = "Select * from StudentInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs=pst.executeQuery();
 			if(rs!=null)
 			tableAll.setModel(DbUtils.resultSetToTableModel(rs));
@@ -260,7 +260,7 @@ public class FrameStudentInfo extends JFrame {
 	private  void refreshTableSID(String ID){
 		try{
 			String query = "Select CourseID from StudentInfo where StudentID = ?";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			pst.setString(1, ID);
 			ResultSet rs=pst.executeQuery();
 			if(rs!=null)
@@ -275,7 +275,7 @@ public class FrameStudentInfo extends JFrame {
 	private  void refreshTableCID(String ID){
 		try{
 			String query = "Select StudentID from StudentInfo where CourseID = ?";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			pst.setString(1, ID);
 			ResultSet rs=pst.executeQuery();
 			if(rs!=null)
@@ -294,7 +294,7 @@ public class FrameStudentInfo extends JFrame {
 		contentPane.add(lblStudentID);
 		
 		
-		tfStudentID.setBounds(11, 100, 100, 20);
+		tfStudentID.setBounds(11, 100, 100, 30);
 		tfStudentID.setText("");
 		contentPane.add(tfStudentID);
 		tfStudentID.setColumns(10);
@@ -309,7 +309,7 @@ public class FrameStudentInfo extends JFrame {
 		lblChangeCourse.setBounds(11, 550, 100, 14);
 		contentPane.add(lblChangeCourse);
 		
-		tfSIDCID.setBounds(136, 550, 86, 20);
+		tfSIDCID.setBounds(136, 550, 86, 30);
 		contentPane.add(tfSIDCID);
 		tfSIDCID.setColumns(10);
 		
@@ -322,7 +322,7 @@ public class FrameStudentInfo extends JFrame {
 		
 		tfCID.setText("");
 		tfCID.setColumns(10);
-		tfCID.setBounds(1000, 78, 86, 20);
+		tfCID.setBounds(1000, 78, 86, 30);
 		contentPane.add(tfCID);
 		
 		lblCID.setBounds(1100, 133, 60, 14);
@@ -334,7 +334,7 @@ public class FrameStudentInfo extends JFrame {
 		contentPane.add(lblInsertStudent);
 		
 		tfCIDSID.setColumns(10);
-		tfCIDSID.setBounds(1200, 550, 86, 20);
+		tfCIDSID.setBounds(1200, 550, 86, 30);
 		contentPane.add(tfCIDSID);
 		
 		
@@ -383,7 +383,7 @@ public class FrameStudentInfo extends JFrame {
 	public static boolean insert_data(String sid, String cid){
 		try{
 			String query = "insert into StudentInfo (StudentID, CourseID ) values (?,?)";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			pst.setString(1, sid);
 			pst.setString(2, cid);
 			pst.execute();
@@ -401,7 +401,7 @@ public class FrameStudentInfo extends JFrame {
 	public void insert(String sid,String cid){
 		try{
 			String query = "insert into StudentInfo (StudentID,CourseID) values(?,?)";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, sid);
 			pst.setString(2, cid);
 			pst.execute();
@@ -415,7 +415,7 @@ public class FrameStudentInfo extends JFrame {
 	public void delete(String sid, String cid){
 		try{
 			String query = "Delete from StudentInfo where CourseID = ? AND StudentID = ?";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, cid);
 			pst.setString(2, sid);
 			pst.execute();
@@ -428,7 +428,7 @@ public class FrameStudentInfo extends JFrame {
 	public void DeleteAll(){
 		try{
 			String query = "Delete * from StudentInfo";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.execute();
 			
 		}catch(Exception e){

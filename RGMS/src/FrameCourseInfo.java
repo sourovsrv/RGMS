@@ -45,7 +45,7 @@ public class FrameCourseInfo extends JFrame {
 	private JTextField tfCID;
 	private JTable table = new JTable(); ;
 	private JComboBox comboBox = new JComboBox();;
-	private Connection connect;
+	//private Connection connect;
 	JRadioButton rdbtnTheory = new JRadioButton("Theory");
 	JRadioButton rdbtnLab = new JRadioButton("Lab");
 	private final ButtonGroup buttonGroup = new ButtonGroup();
@@ -81,7 +81,7 @@ public class FrameCourseInfo extends JFrame {
 	 * Create the frame.
 	 */
 	public FrameCourseInfo() {
-		connect = DB.connectdb();
+		//connect = DB.connectdb();
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
 		
@@ -146,7 +146,7 @@ public class FrameCourseInfo extends JFrame {
 					int row= table.getSelectedRow();
 					String CID_T = (table.getModel().getValueAt(row, 0).toString());
 					String query = "Select * from CourseInfo where CourseID = ?";
-					PreparedStatement pst = connect.prepareStatement(query);
+					PreparedStatement pst = Home.connect.prepareStatement(query);
 					pst.setString(1, CID_T);
 					ResultSet rs= pst.executeQuery();
 					while(rs.next()){
@@ -190,7 +190,7 @@ public class FrameCourseInfo extends JFrame {
 				try{
 					String query = "Select * from CourseInfo where CourseID = ?";
 					String s="";
-					PreparedStatement pst = connect.prepareStatement(query);
+					PreparedStatement pst = Home.connect.prepareStatement(query);
 					pst.setString(1,(String) comboBox.getSelectedItem());
 					ResultSet rs= pst.executeQuery();
 					while(rs.next()){
@@ -276,7 +276,7 @@ public class FrameCourseInfo extends JFrame {
 	private  void refreshTable(){
 		try{
 			String query = "Select * from CourseInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs=pst.executeQuery();
 			if(rs!=null)
 			table.setModel(DbUtils.resultSetToTableModel(rs));
@@ -289,7 +289,7 @@ public class FrameCourseInfo extends JFrame {
 		try{
 			
 			String query = "select * from CourseInfo where CourseID = ?";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			pst.setString(1, CID);
 			ResultSet rs = pst.executeQuery();
 			if(rs.next()==true) {
@@ -309,7 +309,7 @@ public class FrameCourseInfo extends JFrame {
 	public void insert(String cid, String tid, String spw, String type,String batch){
 		try{
 			String query = "insert into CourseInfo (CourseId,TeacherID,SlotPerWeek,Type,Batch) values(?,?,?,?,?)";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, cid);
 			pst.setString(2, tid);
 			pst.setString(3, spw);
@@ -325,7 +325,7 @@ public class FrameCourseInfo extends JFrame {
 	public void update(String cid, String tid, String spw, String type,String batch){
 		try{
 			String query = "Update CourseInfo SET TeacherID = ?, SlotPerWeek = ?, Type= ?, Batch = ? where CourseId= ?";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, tid);
 			pst.setString(2, spw);
 			pst.setString(3, type);
@@ -342,7 +342,7 @@ public class FrameCourseInfo extends JFrame {
 	public void delete(String cid){
 		try{
 			String query = "Delete from CourseInfo where CourseID = ? ";
-			PreparedStatement pst= connect.prepareStatement(query);
+			PreparedStatement pst= Home.connect.prepareStatement(query);
 			pst.setString(1, cid);
 			pst.execute();
 			
@@ -357,8 +357,8 @@ public class FrameCourseInfo extends JFrame {
 			//String query = "select DISTINCT CourseID from StudentInfo where NOT EXISTS( SELECT * FROM CourseInfo WHERE StudentInfo.CourseID = CourseInfo.CourseID )";
 			String query = "select DISTINCT CourseID from StudentInfo";
 			String query2 = "insert into CourseInfo (CourseID) values(?)";
-			PreparedStatement pst = connect.prepareStatement(query);
-			PreparedStatement pst2 = connect.prepareStatement(query2);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			PreparedStatement pst2 = Home.connect.prepareStatement(query2);
 			ResultSet rs= pst.executeQuery();
 			while(rs.next()){
 				String s=rs.getString(1);
@@ -384,7 +384,7 @@ public class FrameCourseInfo extends JFrame {
 		contentpane.add(lblCID);
 		
 		tfCID = new JTextField();
-		tfCID.setBounds(147, 107, 86, 20);
+		tfCID.setBounds(147, 107, 86, 25);
 		tfCID.setText("");
 		contentpane.add(tfCID);
 		tfCID.setColumns(10);
@@ -396,7 +396,7 @@ public class FrameCourseInfo extends JFrame {
 		
 		tfTID = new JTextField();
 		tfTID.setColumns(10);
-		tfTID.setBounds(147, 155, 86, 20);
+		tfTID.setBounds(147, 155, 86, 25);
 		tfTID.setText("");
 		contentpane.add(tfTID);
 		
@@ -405,7 +405,7 @@ public class FrameCourseInfo extends JFrame {
 		contentpane.add(lblSlotPerWeek);
 		
 		tfSPW = new JTextField();
-		tfSPW.setBounds(147, 223, 86, 20);
+		tfSPW.setBounds(147, 223, 86, 25);
 		tfSPW.setText("");
 		contentpane.add(tfSPW);
 		tfSPW.setColumns(10);
@@ -415,7 +415,7 @@ public class FrameCourseInfo extends JFrame {
 		contentpane.add(lblType);
 		
 		tfBatch = new JTextField();
-		tfBatch.setBounds(147, 269, 86, 20);
+		tfBatch.setBounds(147, 269, 86, 25);
 		tfBatch.setText("");
 		contentpane.add(tfBatch);
 		tfBatch.setColumns(10);
@@ -430,7 +430,7 @@ public class FrameCourseInfo extends JFrame {
 		try{
 			comboBox.removeAllItems();
 			String query = "select CourseID from CourseInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs= pst.executeQuery();
 			while(rs.next()){
 				comboBox.addItem(rs.getString(1));

@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -12,10 +13,18 @@ import java.awt.Font;
 import javax.swing.SwingConstants;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
+import javax.swing.UIManager.*;
 
 public class Home {
-
+	public static int TotalNumberOfSlot;
+	public static int TotalNumberOfPos;
+	public static Connection connect =null;
+    public static String daytime[] = new String[10];
+    public static String slottime[] = new String[10];
 	JFrame frame;
 
 	/**
@@ -25,13 +34,25 @@ public class Home {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				//Applying Look and Feel
-				/*try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				try {
+					/*for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+						//System.out.println(info.getName());
+						if ("Nimbus".equals(info.getName())) {
+				            UIManager.setLookAndFeel(info.getClassName());
+				            break;
+				        }
+					}*/
+				    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+                    //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                     ex.printStackTrace();
-                }*/
+                }
 				
 				try {
+					connect=DB.connectdb();
+					TotalNumberOfPos=NumberOfPosQuery();
+					TotalNumberOfSlot=NumberOfSlotQuery();
+					FillDayAndSlotTime();
 					Home window = new Home();
 					window.frame.setVisible(true);
 					window.frame.setExtendedState(window.frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
@@ -46,6 +67,7 @@ public class Home {
 	 * Create the application.
 	 */
 	public Home() {
+
 		initialize();
 	}
 
@@ -117,5 +139,106 @@ public class Home {
 		btnRoutine.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		btnRoutine.setBounds(800, 400, 200, 50);
 		frame.getContentPane().add(btnRoutine);
+		
+		JButton btnPrint = new JButton("5. Print");
+		btnPrint.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//FrameRoutine rti = new FrameRoutine();
+				//rti.setVisible(true);
+				//frame.dispose();
+				//rti.setExtendedState(rti.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnPrint.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnPrint.setBounds(400, 600, 200, 50);
+		frame.getContentPane().add(btnPrint);
+		
+		JButton btnSettings = new JButton("Settings");
+		btnSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FrameSettings stng = new FrameSettings();
+				stng.setVisible(true);
+				frame.dispose();
+				stng.setExtendedState(stng.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnSettings.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnSettings.setBounds(800, 600, 200, 50);
+		frame.getContentPane().add(btnSettings);
+	}
+	
+	public static int NumberOfPosQuery(){
+		int pos=2;
+		try{
+			//connect = DB.connectdb();
+			String query="Select Pos from RoutineInfo";
+			PreparedStatement pst= connect.prepareStatement(query);
+			ResultSet rs=pst.executeQuery();
+			if(rs!=null){
+				while(rs.next()){
+					String s=rs.getString("Pos");
+					int nw=Integer.parseInt(s);
+					if(pos<nw)
+					pos=nw;
+				}
+				rs.close();
+				pst.close();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return pos;
+	}
+	public static int NumberOfSlotQuery(){
+		int slot=5;
+		try{
+			//connect = DB.connectdb();
+			String query="Select ValueOfInfo from SettingsInfo where TypeOfInfo = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, "TotalNumberOfSlot");
+			ResultSet rs=pst.executeQuery();
+			if(rs!=null){
+				while(rs.next()){
+					slot=rs.getInt(1);
+				}
+				rs.close();
+				pst.close();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return slot;
+	}
+	static void FillDayAndSlotTime(){
+		try{
+			String query = "Select ValueOfInfo from SettingsInfo where TypeOfInfo = ?";
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			for(int dayi=1;dayi<=7;dayi++){
+				pst.setString(1, "Day"+dayi);
+				ResultSet rs=pst.executeQuery();
+				while(rs.next()){
+					daytime[dayi]=rs.getString(1);
+				}
+				rs.close();
+			}
+			pst.close();
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+		try{
+			String query = "Select ValueOfInfo from SettingsInfo where TypeOfInfo = ?";
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			for(int sloti=1;sloti<=TotalNumberOfSlot;sloti++){
+				pst.setString(1, "Slot"+sloti);
+				ResultSet rs=pst.executeQuery();
+				while(rs.next()){
+					slottime[sloti]=rs.getString(1);
+				}
+				rs.close();
+			}
+			pst.close();
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
 	}
 }

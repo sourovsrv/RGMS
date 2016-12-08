@@ -34,11 +34,11 @@ import net.proteanit.sql.DbUtils;
 
 
 public class FrameInsertRoomInfo extends JFrame {
-	private static Connection connect =null;
+	//private static Connection connect =null;
 	private JPanel contentPane;
 	private JTextField tfRoomId;
 	private JTextField tfNmbrStdnts;
-	private JRadioButton rdbtnRegular;
+	private JRadioButton rdbtnTheory;
 	private JRadioButton rdbtnLab;
 	private final ButtonGroup buttonGroupRoomInfo = new ButtonGroup();
 	private JButton btnInsert;
@@ -68,10 +68,10 @@ public class FrameInsertRoomInfo extends JFrame {
 		try{
 			String nmbr=nmb+"";
 			String query = "insert into RoomInfo (RoomID,Capacity,Type,Day,Slot) values (?,?,?,?,?)";
-			PreparedStatement pst = connect.prepareStatement(query);
-			int slot=FrameMainRoomInfo.NumberOfSlotQuery();
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			//int slot=FrameMainRoomInfo.NumberOfSlotQuery();
 			for(int i=1;i<=7;i++){//Day
-				for(int j=1;j<=slot;j++){//Slot
+				for(int j=1;j<=Home.TotalNumberOfSlot;j++){//Slot
 					pst.setString(1, rid);
 					pst.setString(2, nmbr);
 					pst.setString(3, type);
@@ -93,7 +93,7 @@ public class FrameInsertRoomInfo extends JFrame {
 	public static void Delete(String rid){
 		try{
 			String query = "delete from RoomInfo where RoomID = ?";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			pst.setString(1, rid);
 			pst.execute();	
 			pst.close();
@@ -108,7 +108,7 @@ public class FrameInsertRoomInfo extends JFrame {
 	 */
 	public FrameInsertRoomInfo() {
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		connect = DB.connectdb();
+		//connect = DB.connectdb();
 		setBounds(100, 100, 833, 494);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -135,7 +135,7 @@ public class FrameInsertRoomInfo extends JFrame {
 		
 		JLabel lblRoomId = new JLabel("Room ID");
 		lblRoomId.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblRoomId.setBounds(20, 157, 86, 25);
+		lblRoomId.setBounds(20, 157, 86, 30);
 		contentPane.add(lblRoomId);
 		
 		
@@ -152,13 +152,13 @@ public class FrameInsertRoomInfo extends JFrame {
 		lblNumberOfStudents.setBounds(20, 224, 139, 23);
 		contentPane.add(lblNumberOfStudents);
 		
-		rdbtnRegular = new JRadioButton();
-		rdbtnRegular.setText("Regular");
-		rdbtnRegular.setSelected(true);
-		buttonGroupRoomInfo.add(rdbtnRegular);
-		rdbtnRegular.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		rdbtnRegular.setBounds(51, 301, 200, 50);
-		contentPane.add(rdbtnRegular);
+		rdbtnTheory = new JRadioButton();
+		rdbtnTheory.setText("Theory");
+		rdbtnTheory.setSelected(true);
+		buttonGroupRoomInfo.add(rdbtnTheory);
+		rdbtnTheory.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		rdbtnTheory.setBounds(51, 301, 200, 50);
+		contentPane.add(rdbtnTheory);
 		
 		rdbtnLab = new JRadioButton();
 		rdbtnLab.setText("Lab");
@@ -175,7 +175,7 @@ public class FrameInsertRoomInfo extends JFrame {
 				int nmbr=0;
 				try{
 					nmbr = Integer.parseInt(tfNmbrStdnts.getText());
-					if(rdbtnRegular.isSelected()==true) type="Regular";
+					if(rdbtnTheory.isSelected()==true) type="Theory";
 					else type="Lab";
 					boolean nw=insert_data(tfRoomId.getText(),nmbr,type);
 					if(nw==true){
@@ -226,7 +226,7 @@ public class FrameInsertRoomInfo extends JFrame {
 	private  void refreshTable(){
 		try{
 			String query = "Select Distinct RoomID, Capacity, Type from RoomInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs=pst.executeQuery();
 			if(rs!=null)
 			table.setModel(DbUtils.resultSetToTableModel(rs));

@@ -46,6 +46,7 @@
 <fullyQualifiedTypeName name="com.sun.corba.se.pept.transport.Connection"/>
 <fullyQualifiedTypeName name="java.awt.dnd.DnDConstants"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="javax.swing.JOptionPane"/>
 <fullyQualifiedTypeName name="javax.swing.text.Position"/>
+<fullyQualifiedTypeName name="javax.swing.JOptionPane"/>
+<fullyQualifiedTypeName name="Home"/>
 </qualifiedTypeNameHistroy>

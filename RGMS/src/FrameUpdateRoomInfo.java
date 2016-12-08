@@ -35,12 +35,13 @@ import javax.swing.JComboBox;
 
 
 public class FrameUpdateRoomInfo extends JFrame {
-	private static Connection connect =null;
+	//private static Connection connect =null;
 	private JPanel contentPane;
-	private final ButtonGroup buttonGroupRoomInfo = new ButtonGroup();
+	//private final ButtonGroup buttonGroupRoomInfo = new ButtonGroup();
 	private JButton btnUpdate;
 	private JComboBox comboBox = new JComboBox();
-	private int NumberOfSlot;
+	private JCheckBox chckbxSlot[][] = new JCheckBox[10][12];
+	//private int NumberOfSlot;
 
 	/**
 	 * Launch the application.
@@ -64,10 +65,10 @@ public class FrameUpdateRoomInfo extends JFrame {
 		try{
 			String nmbr=nmb+"";
 			String query = "insert into RoomInfo (RoomID,Capacity,Type,Day,Slot) values (?,?,?,?,?)";
-			PreparedStatement pst = connect.prepareStatement(query);
-			int slot=FrameMainRoomInfo.NumberOfSlotQuery();
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			//int slot=FrameMainRoomInfo.NumberOfSlotQuery();
 			for(int i=1;i<=7;i++){//Day
-				for(int j=1;j<=slot;j++){//Slot
+				for(int j=1;j<=Home.TotalNumberOfSlot;j++){//Slot
 					pst.setString(1, rid);
 					pst.setString(2, nmbr);
 					pst.setString(3, type);
@@ -91,7 +92,7 @@ public class FrameUpdateRoomInfo extends JFrame {
 	 */
 	public FrameUpdateRoomInfo() {
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		connect = DB.connectdb();
+		//connect = DB.connectdb();
 		setBounds(100, 100, 833, 494);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -109,22 +110,7 @@ public class FrameUpdateRoomInfo extends JFrame {
                 e.getWindow().dispose();
             }
         });
-		
-		JLabel lblRoomId = new JLabel("Room ID");
-		lblRoomId.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblRoomId.setBounds(241, 46, 86, 25);
-		contentPane.add(lblRoomId);
-		
-		NumberOfSlot=FrameMainRoomInfo.NumberOfSlotQuery();
-		btnUpdate = new JButton("Update");
-		btnUpdate.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			
-			}
-		});
-		btnUpdate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnUpdate.setBounds(342, 621, 89, 23);
-		contentPane.add(btnUpdate);
+	
 		
 		JLabel lblUpdateRoomInfo = new JLabel("Update Room Information");
 		lblUpdateRoomInfo.setBounds(243, 11, 300, 24);
@@ -133,29 +119,53 @@ public class FrameUpdateRoomInfo extends JFrame {
 		contentPane.add(lblUpdateRoomInfo);
 		
 		
+		JLabel lblRoomId = new JLabel("Room ID");
+		lblRoomId.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblRoomId.setBounds(241, 46, 86, 25);
+		contentPane.add(lblRoomId);
+		
+		//NumberOfSlot=FrameMainRoomInfo.NumberOfSlotQuery();
+		btnUpdate = new JButton("Update");
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				UpdateDatabase();
+				JOptionPane.showMessageDialog(null, "Data Updated");
+			}
+		});
+		btnUpdate.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnUpdate.setBounds(342, 621, 89, 23);
+		contentPane.add(btnUpdate);
+		
+
 		comboBox.setBounds(358, 50, 103, 21);
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FillCheckBox();
+				
+			}
+		});
 		contentPane.add(comboBox);
 		
 		ShowDaySlot();
 		FillComboBox();
 	}
+	//Shows the fieild of Label and Check box
 	private void ShowDaySlot(){
 		
 		JLabel lblSlot[] = new JLabel[12];
 		JLabel lblDay[] = new JLabel[10];
 		int dayi,sloti,slotpos,daypos;
-		for(sloti=1,slotpos=200;sloti<=NumberOfSlot;sloti++,slotpos+=100){
+		for(sloti=1,slotpos=200;sloti<=Home.TotalNumberOfSlot;sloti++,slotpos+=100){
 			lblSlot[sloti] = new JLabel("Slot "+sloti);
 			lblSlot[sloti].setBounds(slotpos,128, 46, 14);
 			contentPane.add(lblSlot[sloti]);
 		}
-		JCheckBox chckbxSlot[][] = new JCheckBox[10][12];
+		
 		for(dayi=1,daypos=180;dayi<=7;dayi++,daypos+=50){
 			lblDay[dayi] = new JLabel("Day "+dayi);
 			lblDay[dayi].setBounds(50,daypos, 46, 14);
 			contentPane.add(lblDay[dayi]);
-			
-			for(sloti=1,slotpos=200;sloti<=NumberOfSlot;sloti++,slotpos+=100){
+			for(sloti=1,slotpos=200;sloti<=Home.TotalNumberOfSlot;sloti++,slotpos+=100){
 				chckbxSlot[dayi][sloti]=new JCheckBox("Status");
 				chckbxSlot[dayi][sloti].setBounds(slotpos, daypos, 97, 23);
 				contentPane.add(chckbxSlot[dayi][sloti]);
@@ -165,12 +175,64 @@ public class FrameUpdateRoomInfo extends JFrame {
 		
 		
 	}
+	
+	//Fills the query from database
+	private void FillCheckBox(){
+		try{
+			String rm=(String) comboBox.getSelectedItem();
+			String query="Select * From RoomInfo where RoomID = ?";
+			PreparedStatement pst = Home.connect.prepareStatement(query);
+			pst.setString(1, rm);
+			ResultSet rs=pst.executeQuery();
+			while(rs.next()){
+				int day=rs.getInt("Day");
+				int slot=rs.getInt("Slot");
+				int status=rs.getInt("Status");
+				if(status==1){
+					chckbxSlot[day][slot].setSelected(true);
+				}
+				else{
+					chckbxSlot[day][slot].setSelected(false);
+				}
+			}
+			rs.close();
+			pst.close();
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
+	
+	//Update Database after clicking Update Button
+	private void UpdateDatabase(){
+		try{
+			int dayi,sloti;
+			for(dayi=1;dayi<=7;dayi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
+					String query = "Update RoomInfo SET Status = ? where RoomID = ? AND Day = ? AND Slot= ?";
+					PreparedStatement pst = Home.connect.prepareStatement(query);
+					pst.setBoolean(1, chckbxSlot[dayi][sloti].isSelected());
+					pst.setString(2, (String)comboBox.getSelectedItem());
+					pst.setInt(3, dayi);
+					pst.setInt(4, sloti);
+					pst.execute();
+				}
+				
+			}
+			
+			
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
 	//	Fill ComboBox with Room
 	private void FillComboBox(){
 		try{
 			comboBox.removeAllItems();
 			String query = "select Distinct RoomID from RoomInfo";
-			PreparedStatement pst = connect.prepareStatement(query);
+			PreparedStatement pst = Home.connect.prepareStatement(query);
 			ResultSet rs= pst.executeQuery();
 			while(rs.next()){
 				comboBox.addItem(rs.getString(1));

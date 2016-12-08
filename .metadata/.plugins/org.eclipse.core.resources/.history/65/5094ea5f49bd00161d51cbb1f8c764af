@@ -1,0 +1,209 @@
+import java.awt.EventQueue;
+import java.awt.Window;
+
+import javax.swing.JFrame;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import java.awt.Font;
+import javax.swing.SwingConstants;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import javax.swing.UIManager.*;
+
+public class Home {
+	public static int TotalNumberOfSlot;
+	public static int TotalNumberOfPos;
+	public static Connection connect =null;
+	JFrame frame;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				//Applying Look and Feel
+				try {
+					/*for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+						//System.out.println(info.getName());
+						if ("Nimbus".equals(info.getName())) {
+				            UIManager.setLookAndFeel(info.getClassName());
+				            break;
+				        }
+					}*/
+				    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+                    //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+                    ex.printStackTrace();
+                }
+				
+				try {
+					connect=DB.connectdb();
+					TotalNumberOfPos=NumberOfPosQuery();
+					TotalNumberOfSlot=NumberOfSlotQuery();
+					Home window = new Home();
+					window.frame.setVisible(true);
+					window.frame.setExtendedState(window.frame.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public Home() {
+
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.setBounds(100, 100, 743, 389);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		
+		JLabel lblHome = new JLabel("Home");
+		lblHome.setFont(new Font("Tahoma", Font.BOLD, 30));
+		lblHome.setBounds(500, 100, 200, 50);
+		frame.getContentPane().add(lblHome);
+		
+		
+		JButton btnRoomInfo = new JButton("1. Room Info");
+		btnRoomInfo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				FrameMainRoomInfo mri=new FrameMainRoomInfo();
+				mri.setVisible(true);
+				frame.dispose();
+				mri.setExtendedState(mri.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnRoomInfo.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnRoomInfo.setBounds(400, 200, 200, 50);
+		frame.getContentPane().add(btnRoomInfo);
+		
+		
+		JButton btnStudentInfo = new JButton("2. Student Info");
+		btnStudentInfo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			FrameStudentInfo si= new FrameStudentInfo();
+			si.setVisible(true);
+			frame.dispose();
+			si.setExtendedState(si.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnStudentInfo.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnStudentInfo.setBounds(800, 200, 200, 50);
+		frame.getContentPane().add(btnStudentInfo);
+		
+		JButton btnCourseInfo = new JButton("3. Course Info");
+		btnCourseInfo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FrameCourseInfo ci = new FrameCourseInfo();
+				ci.setVisible(true);
+				frame.dispose();
+				ci.setExtendedState(ci.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnCourseInfo.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnCourseInfo.setBounds(400, 400, 200, 50);
+		frame.getContentPane().add(btnCourseInfo);
+		
+		JButton btnRoutine = new JButton("4. Routine");
+		btnRoutine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FrameRoutine rti = new FrameRoutine();
+				rti.setVisible(true);
+				frame.dispose();
+				rti.setExtendedState(rti.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnRoutine.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnRoutine.setBounds(800, 400, 200, 50);
+		frame.getContentPane().add(btnRoutine);
+		
+		JButton btnPrint = new JButton("5. Print");
+		btnPrint.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//FrameRoutine rti = new FrameRoutine();
+				//rti.setVisible(true);
+				//frame.dispose();
+				//rti.setExtendedState(rti.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnPrint.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnPrint.setBounds(400, 600, 200, 50);
+		frame.getContentPane().add(btnPrint);
+		
+		JButton btnSettings = new JButton("Settings");
+		btnSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FrameSettings stng = new FrameSettings();
+				stng.setVisible(true);
+				frame.dispose();
+				stng.setExtendedState(stng.getExtendedState()| JFrame.MAXIMIZED_BOTH);
+			}
+		});
+		btnSettings.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnSettings.setBounds(800, 600, 200, 50);
+		frame.getContentPane().add(btnSettings);
+	}
+	
+	public static int NumberOfPosQuery(){
+		int pos=2;
+		try{
+			//connect = DB.connectdb();
+			String query="Select Pos from RoutineInfo";
+			PreparedStatement pst= connect.prepareStatement(query);
+			ResultSet rs=pst.executeQuery();
+			if(rs!=null){
+				while(rs.next()){
+					String s=rs.getString("Pos");
+					int nw=Integer.parseInt(s);
+					if(pos<nw)
+					pos=nw;
+				}
+				rs.close();
+				pst.close();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return pos;
+	}
+	public static int NumberOfSlotQuery(){
+		int slot=5;
+		try{
+			//connect = DB.connectdb();
+			String query="Select ValueOfInfo from SettingsInfo where TypeOfInfo = ?";
+			PreparedStatement pst= connect.prepareStatement(query);
+			pst.setString(1, "TotalNumberOfSlot");
+			ResultSet rs=pst.executeQuery();
+			if(rs!=null){
+				while(rs.next()){
+					slot=rs.getInt(1);
+				}
+				rs.close();
+				pst.close();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return slot;
+	}
+}

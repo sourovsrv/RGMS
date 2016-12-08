@@ -25,22 +25,23 @@ import javax.swing.text.Position;
 public class ButtonHandler {
 	public JPanel subcontentPane;
 	public JScrollPane scrollPane;
-	private Connection connectbtnhnd=null;
+	//private Connection connectbtnhnd=null;
 	JButton btnplus = new JButton("+");
 	JButton btnminus = new JButton("-");
 	RoomHandler rmhnd = new RoomHandler();
 	
 	ConflictCheck objconf ;
 	public int totalday=7;
-	public int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
-	public int totalpos=ConflictCheck.NumberOfPosQuery();
+	//public int totalslot=FrameMainRoomInfo.NumberOfSlotQuery();
+	//public int totalpos=ConflictCheck.NumberOfPosQuery();
 	
 	JComboBox boxRoom[][][] = new JComboBox[10][10][10];
     JButton btn[][][] = new JButton[10][10][10];
     JLabel lblTeacher[][][] = new JLabel[10][10][10];
+    JLabel lblBatch[][][] = new JLabel[10][10][10];
     JLabel Day[]=new JLabel[10];
     JLabel slotlbl[] = new JLabel[10];
- 
+
     
 	
 	public void ButtonHandler(){
@@ -48,11 +49,10 @@ public class ButtonHandler {
 		
 	}
 	public void SubPanelCreator(){
-		
 		//SubcontentPane
 		subcontentPane = new JPanel();
 		subcontentPane.setLayout(null);
-		subcontentPane.setPreferredSize(new Dimension(1700,1500));
+		subcontentPane.setPreferredSize(new Dimension(2600,1700));
 		
 		//ScrollPane
 		scrollPane = new JScrollPane();;
@@ -86,19 +86,19 @@ public class ButtonHandler {
 		int dayi,posi,sloti,pos=0;
 		int boxleft=40,boxup=35;
 		int slotlblpos=130;
-		for(sloti=1;sloti<=totalslot;sloti++){
-			slotlbl[sloti] = new JLabel("Slot-"+sloti);
-			slotlbl[sloti].setBounds(slotlblpos, 5, 50, 25);
+		for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
+			slotlbl[sloti] = new JLabel(Home.slottime[sloti]);
+			slotlbl[sloti].setBounds(slotlblpos, 5, 100, 25);
 			subcontentPane.add(slotlbl[sloti]);
-			slotlblpos+=240;
+			slotlblpos+=280;
 		}
 		
         for(dayi=1;dayi<=totalday;dayi++){
-            Day[dayi] = new JLabel("Day-"+dayi);
+            Day[dayi] = new JLabel(Home.daytime[dayi]);
         	Day[dayi].setBounds(0, boxup+30, 35, 25);
             subcontentPane.add(Day[dayi]);
-        	for(posi=1;posi<=totalpos;posi++){
-        		for(sloti=1;sloti<=totalslot;sloti++){
+        	for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+        		for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
         			boxRoom[dayi][sloti][posi] = new JComboBox();
             		boxRoom[dayi][sloti][posi].setBounds(boxleft+5, boxup, 70, 25);
             		subcontentPane.add(boxRoom[dayi][sloti][posi]);
@@ -114,11 +114,17 @@ public class ButtonHandler {
                     subcontentPane.add(btn[dayi][sloti][posi]);
                     
                     
-                    lblTeacher[dayi][sloti][posi] = new JLabel("TTT");
+                    lblTeacher[dayi][sloti][posi] = new JLabel("..");
             		lblTeacher[dayi][sloti][posi].setFont(new Font("Tahoma",Font.PLAIN,14));
             		lblTeacher[dayi][sloti][posi].setBounds(boxleft+185,boxup,35,25);
             		subcontentPane.add(lblTeacher[dayi][sloti][posi]);
-            		boxleft+=240;
+            		
+            		lblBatch[dayi][sloti][posi] = new JLabel("..");
+            		lblBatch[dayi][sloti][posi].setFont(new Font("Tahoma",Font.PLAIN,14));
+            		lblBatch[dayi][sloti][posi].setBounds(boxleft+230,boxup,35,25);
+            		subcontentPane.add(lblBatch[dayi][sloti][posi]);
+            		
+            		boxleft+=280;
         		}
         		boxleft=40;
         		boxup+=30;
@@ -129,8 +135,8 @@ public class ButtonHandler {
         FillAllButton();
         //Adding action listener to the combo box
         for(dayi=1;dayi<=totalday;dayi++){
-        	for(posi=1;posi<=totalpos;posi++){
-        		for(sloti=1;sloti<=totalslot;sloti++){
+        	for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+        		for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
                      boxRoom[dayi][sloti][posi].addActionListener(new ActionListener() {                   	
                     	public void actionPerformed(ActionEvent arg0) {
                     		CheckRoomAfterChange();
@@ -143,8 +149,8 @@ public class ButtonHandler {
 	}
 	
 	public void AddButton(){
-		if(totalpos<7) {
-			totalpos++;
+		if(Home.TotalNumberOfPos<7) {
+			Home.TotalNumberOfPos++;
 			subcontentPane.removeAll();
 			
 			CreateButton();
@@ -156,10 +162,10 @@ public class ButtonHandler {
 	}
 	
 	public void MinusButton(){
-		if(totalpos>2) {
-			objconf.DeleteFromRoutineOnPos(totalpos,totalslot);	
+		if(Home.TotalNumberOfPos>2) {
+			objconf.DeleteFromRoutineOnPos(Home.TotalNumberOfPos,Home.TotalNumberOfSlot);	
 				
-			totalpos--;
+			Home.TotalNumberOfPos--;
 			subcontentPane.removeAll();
 			
 			CreateButton();
@@ -176,20 +182,37 @@ public class ButtonHandler {
 		int dayi,posi, sloti, lpi;
 		String course="",teacher="";
 		for(dayi=1;dayi<=totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					course=objconf.Matrix[dayi][sloti][posi][1]; //1 for Course
-					if(course==null) course = "CSE-XXX";
-					if(course.equals("CSE-XXX")){
+					if(course==null) course = "---";
+					if(course.equals("---")){
 						btn[dayi][sloti][posi].setBackground(Color.GRAY);
 					}
 					else{
-						int check = objconf.CheckAllRedConflict(dayi,sloti, posi);
-						if(check==1) btn[dayi][sloti][posi].setBackground(Color.RED);
-						else if(objconf.CheckAllYellowConflict(dayi, sloti, posi)==1){
+						int check;
+						String RedConflictMessage=objconf.CheckAllRedConflict(dayi,sloti, posi);
+						String YellowConflictMessage=objconf.CheckAllYellowConflict(dayi, sloti, posi);
+						String CyanConflictMessage=objconf.CheckAllCyanConflict(dayi, sloti, posi);
+						String receiveconflict="<html>";
+						receiveconflict+=RedConflictMessage;
+						receiveconflict+=YellowConflictMessage;
+						receiveconflict+=CyanConflictMessage;
+						if(RedConflictMessage.length()!=0){
+							btn[dayi][sloti][posi].setBackground(Color.RED);
+						}
+						else if(YellowConflictMessage.length()!=0){
 							btn[dayi][sloti][posi].setBackground(Color.YELLOW);
 						}
-						else btn[dayi][sloti][posi].setBackground(Color.WHITE);						
+						else if(CyanConflictMessage.length()!=0){
+							btn[dayi][sloti][posi].setBackground(Color.CYAN);
+						}
+						else{
+							btn[dayi][sloti][posi].setBackground(Color.WHITE);
+							receiveconflict+= "No Conflict";
+						}
+						receiveconflict+="</html";
+						btn[dayi][sloti][posi].setToolTipText(receiveconflict);
 					}
 				}
 			}
@@ -199,29 +222,34 @@ public class ButtonHandler {
 	void FillMatrixAfterDrop()
 	{
 		int dayi,posi, sloti, lpi;
-		String coursemat="",coursebtn="",teacher="";
+		String coursemat="",coursebtn="",teacher="",batch="";
 		for(dayi=1;dayi<=totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					coursebtn=btn[dayi][sloti][posi].getText();//From Button
 					coursemat=objconf.Matrix[dayi][sloti][posi][1]; //1 for Course, From Matrix
 					
-					if(coursebtn.equals("CSE-XXX")){
+					if(coursebtn.equals("---")){
 						if(coursemat!=null){
 							objconf.DeleteFromRoutine(dayi, sloti, posi);
-							lblTeacher[dayi][sloti][posi].setText("TTT");
+							lblTeacher[dayi][sloti][posi].setText("..");
+							lblBatch[dayi][sloti][posi].setText("..");
 						}
 					}
 					else{
 						if(coursemat==null){
 							objconf.InsertIntoMatrix(dayi, sloti, posi, coursebtn);
 							teacher= objconf.Matrix[dayi][sloti][posi][3];//3 for teacher
+							batch = objconf.Matrix[dayi][sloti][posi][4];//4 for Batch
 							lblTeacher[dayi][sloti][posi].setText(teacher);
+							lblBatch[dayi][sloti][posi].setText(batch);
 						}
 						else if(!coursebtn.equals(coursemat)){//if btn course and matrix course is not equal
 							objconf.UpdateInRoutine(dayi, sloti, posi, coursebtn);
 							teacher= objconf.Matrix[dayi][sloti][posi][3];//3 for teacher
+							batch = objconf.Matrix[dayi][sloti][posi][4];//4 for Batch
 							lblTeacher[dayi][sloti][posi].setText(teacher);
+							lblBatch[dayi][sloti][posi].setText(batch);
 						}
 					}
 				}
@@ -234,19 +262,21 @@ public class ButtonHandler {
 	void FillAllButton()
 	{
 		int dayi,posi, sloti, lpi;
-		String room,course="",teacher="";
+		String room,course="",teacher="",batch="";
 		for(dayi=1;dayi<=totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					course=objconf.Matrix[dayi][sloti][posi][1]; //1 for Course
 					room=objconf.Matrix[dayi][sloti][posi][2];//2 for Room
 					teacher=objconf.Matrix[dayi][sloti][posi][3]; //3 for Teacher
-					if(course==null) course = "CSE-XXX";
-					if(teacher==null) teacher = "TTT";
+					batch=objconf.Matrix[dayi][sloti][posi][4];//4 for Batch
+					if(course==null) course = "---";
+					if(teacher==null) teacher = "..";
+					if(batch==null)		batch = "..";
 					btn[dayi][sloti][posi].setText(course);
 					lblTeacher[dayi][sloti][posi].setText(teacher);
-					
-					boxRoom[dayi][sloti][posi].addItem("RRR");
+					lblBatch[dayi][sloti][posi].setText(batch);
+					boxRoom[dayi][sloti][posi].addItem("Room");
 					for(String key: rmhnd.roomidmap.keySet()){
 						int id=rmhnd.roomidmap.get(key);
 						if(rmhnd.roomstatus[id][dayi][sloti]==0){
@@ -260,11 +290,11 @@ public class ButtonHandler {
 			}
 		}
 		for(dayi=1;dayi<=totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					room=(String)boxRoom[dayi][sloti][posi].getSelectedItem();
 					//System.out.println(day+" "+slot+ " "+pos+" "+room);
-					if(!room.equals("RRR"))
+					if(!room.equals("Room"))
 					DeleteRoomComboBoxAfterDrop(dayi,sloti,posi,room);
 				}
 				
@@ -273,11 +303,11 @@ public class ButtonHandler {
 		CheckAndColor();
 		
 	}
-	
+
 	/*//Given a day and slot, find all the available in that day and slot and pos
 	private void FillRoomComboBox(int day,int slot,int pos){
 		boxRoom[day][slot][pos].removeAllItems();
-		boxRoom[day][slot][pos].addItem("RRR");
+		boxRoom[day][slot][pos].addItem("Room");
 		for(String key: rmhnd.roomidmap.keySet()){
 			int id=rmhnd.roomidmap.get(key);
 			if(rmhnd.roomstatus[id][day][slot]==0){
@@ -296,7 +326,7 @@ public class ButtonHandler {
 	//Given a day and slot, delete room from all the position
 	private void AddRoomComboBoxAfterDrop(int day,int slot,int pos,String rm){
 		int posi;
-		for(posi=1;posi<=totalpos;posi++){
+		for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
 			if(pos==posi) continue;
 			boxRoom[day][slot][posi].addItem(rm);
 		}
@@ -306,7 +336,7 @@ public class ButtonHandler {
 	//Given a day and slot, delete room from all the position
 	private void DeleteRoomComboBoxAfterDrop(int day,int slot,int pos,String rm){
 		int posi;
-		for(posi=1;posi<=totalpos;posi++){
+		for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
 			if(pos==posi) continue;
 			boxRoom[day][slot][posi].removeItem(rm);
 		}
@@ -316,11 +346,11 @@ public class ButtonHandler {
 	private void CheckRoomAfterChange(){
 		int dayi,sloti,posi,id;
 		for(dayi=1;dayi<=totalday;dayi++){
-			for(posi=1;posi<=totalpos;posi++){
-				for(sloti=1;sloti<=totalslot;sloti++){
+			for(posi=1;posi<=Home.TotalNumberOfPos;posi++){
+				for(sloti=1;sloti<=Home.TotalNumberOfSlot;sloti++){
 					String rm=(String) boxRoom[dayi][sloti][posi].getSelectedItem();
 					String roommat= objconf.Matrix[dayi][sloti][posi][2];//2 for room
-					if(rm.equals("RRR")){
+					if(rm.equals("Room")){
 						if(roommat!=null&&!roommat.equals("")){
 							AddRoomComboBoxAfterDrop(dayi,sloti,posi,roommat);
 							rmhnd.DeleteFromMatrix(dayi, sloti, posi);
